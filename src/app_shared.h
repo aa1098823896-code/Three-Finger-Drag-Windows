@@ -1,5 +1,6 @@
 #ifndef THREE_FINGER_APP_SHARED_H
 #define THREE_FINGER_APP_SHARED_H
+#include "app_language.h"
 #define APP_HOST_CLASS L"ThreeFingerDrag-Native-Host"
 #define APP_UI_CLASS L"ThreeFingerDrag-Native-Settings"
 #define APP_TRAY_MENU_CLASS L"ThreeFingerDrag-Native-TrayMenu"
@@ -17,6 +18,7 @@
 static WCHAR app_folder[MAX_PATH],data_folder[MAX_PATH],config_path[MAX_PATH];
 static int app_paths(int isolated){
     WCHAR *slash;DWORD n;
+    app_language_init();
     n=GetModuleFileNameW(0,app_folder,MAX_PATH);if(!n||n>=MAX_PATH)return 0;
     slash=wcsrchr(app_folder,L'\\');if(!slash)return 0;*slash=0;
     if(isolated)_snwprintf(data_folder,MAX_PATH,L"%s",app_folder);

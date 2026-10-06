@@ -45,6 +45,8 @@ UI_GP(GdipSetStringFormatAlign,(void *,int));
 UI_GP(GdipSetStringFormatLineAlign,(void *,int));
 UI_GP(GdipDeleteStringFormat,(void *));
 UI_GP(GdipAddPathString,(void *,const WCHAR *,int,const void *,int,float,const UI_RECTF *,const void *));
+UI_GP(GdipGetPathWorldBounds,(void *,UI_RECTF *,const void *,const void *));
+UI_GP(GdipTransformPath,(void *,void *));
 #undef UI_GP
 static void graphics_check(int status){if(status)graphics_error=status;}
 static int graphics_init(void){
@@ -65,7 +67,7 @@ static int graphics_init(void){
     UI_LOAD(GdipFillEllipse);UI_LOAD(GdipDrawLine);
     UI_LOAD(GdipCreateBitmapFromScan0);UI_LOAD(GdipDrawImageRectI);UI_LOAD(GdipDisposeImage);UI_LOAD(GdipSetInterpolationMode);
     UI_LOAD(GdipCreateFontFamilyFromName);UI_LOAD(GdipDeleteFontFamily);
-    UI_LOAD(GdipCreateStringFormat);UI_LOAD(GdipSetStringFormatAlign);UI_LOAD(GdipSetStringFormatLineAlign);UI_LOAD(GdipDeleteStringFormat);UI_LOAD(GdipAddPathString);
+    UI_LOAD(GdipCreateStringFormat);UI_LOAD(GdipSetStringFormatAlign);UI_LOAD(GdipSetStringFormatLineAlign);UI_LOAD(GdipDeleteStringFormat);UI_LOAD(GdipAddPathString);UI_LOAD(GdipGetPathWorldBounds);UI_LOAD(GdipTransformPath);
 #undef UI_LOAD
     memset(&input,0,sizeof(input));input.version=1;
     return graphics_startup(&graphics_token,&input,0)==0;

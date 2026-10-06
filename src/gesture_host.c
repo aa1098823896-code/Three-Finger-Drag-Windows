@@ -7,6 +7,7 @@
 #include <string.h>
 #include <wchar.h>
 #include <math.h>
+#define APP_LANGUAGE_HOST
 #include "app_shared.h"
 
 /* The background entry is native; read-only diagnostics never inject input. */
@@ -346,7 +347,7 @@ int WINAPI WinMain(HINSTANCE instance,HINSTANCE previous,LPSTR command,int show)
     mutex=CreateMutexW(0,TRUE,APP_MUTEX);if(GetLastError()==ERROR_ALREADY_EXISTS){CloseHandle(mutex);return 0;}
     memset(&wc,0,sizeof(wc));wc.lpfnWndProc=wndproc;wc.hInstance=instance;wc.lpszClassName=class_name;
     if(!RegisterClassW(&wc)){CloseHandle(mutex);return 1;}
-    host=CreateWindowExW(0,class_name,L"三指拖拽 · 原生内存验证",0,0,0,0,0,0,0,instance,0);if(!host){CloseHandle(mutex);return 1;}
+    host=CreateWindowExW(0,class_name,app_text(APP_TEXT_HOST_WINDOW_NAME),0,0,0,0,0,0,0,instance,0);if(!host){CloseHandle(mutex);return 1;}
     sources_frozen=!simulate;enumerate_devices();
     if(!simulate){int i;for(i=0;i<device_n;i++)if(!native_device(&devices[i])){cleanup();DestroyWindow(host);CloseHandle(mutex);return 1;}}
     raw_device.usUsagePage=13;raw_device.usUsage=5;raw_device.dwFlags=0x2100;raw_device.hwndTarget=host;

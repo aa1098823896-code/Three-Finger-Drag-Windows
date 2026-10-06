@@ -40,7 +40,8 @@ static int prompt_report(int applied){return 1;}
 #include "settings_ui.c"
 #undef WinMain
 int WINAPI WinMain(HINSTANCE instance,HINSTANCE previous,LPSTR command,int show){
-    WCHAR first[4096];int passed,privacy,generic,scope,independent,failure,unknown;FILE *f;
+    WCHAR first[4096];int passed,privacy,generic,scope,independent,failure,unknown,locale,all_languages=1,max_translated=0;FILE *f;
+    app_language=APP_LANG_ZH_CN;app_language_initialized=1;
     /* Paths are test fixtures, not a real person's account or installation. */
     wcscpy(data_folder,L"C:\\Users\\PrivacyProbeLocal\\AppData\\Local\\ThreeFingerDragNative");
     wcscpy(app_folder,L"D:\\PrivateInstallProbe\\GestureTools");
@@ -68,7 +69,14 @@ int WINAPI WinMain(HINSTANCE instance,HINSTANCE previous,LPSTR command,int show)
         &&!wcsstr(captured_prompt,L"三指轻扫已设为「无」")&&wcslen(captured_prompt)<=300;
     if(captured_memory){GlobalFree(captured_memory);captured_memory=0;}
     passed=privacy&&generic&&scope&&independent&&failure&&unknown;
+    prompt_native_readable=prompt_cache_readable=1;
+    for(locale=0;locale<9;locale++){
+        app_language=locale;app_language_initialized=1;setup_copy_ai();
+        if(setup_copy_result!=1||!wcsstr(captured_prompt,app_text(APP_TEXT_PROMPT_NOT_READY))||wcsstr(captured_prompt,L":\\")||wcsstr(captured_prompt,L"PrivacyProbe")||wcsstr(captured_prompt,L"PrivateInstallProbe"))all_languages=0;
+        if(wcslen(captured_prompt)>max_translated)max_translated=(int)wcslen(captured_prompt);
+        if(captured_memory){GlobalFree(captured_memory);captured_memory=0;}
+    }passed&=all_languages;
     f=fopen("ai-prompt-privacy.json","wb");if(!f)return 3;
-    fprintf(f,"{\"Passed\":%s,\"CapturedClipboardOnly\":true,\"UserClipboardUntouched\":true,\"NoPersonalPaths\":%s,\"NoPathNeeded\":%s,\"TwoSettingsScopePreserved\":%s,\"DifferentLocalPathsProduceSamePrompt\":%s,\"ClipboardFailureDoesNotClaimSuccess\":%s,\"UnavailableDetectionShownAsUnknown\":%s,\"PromptCharacters\":%lu,\"RealInputCalls\":0}",passed?"true":"false",privacy?"true":"false",generic?"true":"false",scope?"true":"false",independent?"true":"false",failure?"true":"false",unknown?"true":"false",(unsigned long)wcslen(first));
+    fprintf(f,"{\"Passed\":%s,\"CapturedClipboardOnly\":true,\"UserClipboardUntouched\":true,\"NoPersonalPaths\":%s,\"NoPathNeeded\":%s,\"TwoSettingsScopePreserved\":%s,\"DifferentLocalPathsProduceSamePrompt\":%s,\"ClipboardFailureDoesNotClaimSuccess\":%s,\"UnavailableDetectionShownAsUnknown\":%s,\"PromptCharacters\":%lu,\"LanguagesChecked\":9,\"AllLanguagePromptsPrivate\":%s,\"MaximumTranslatedPromptCharacters\":%d,\"RealInputCalls\":0}",passed?"true":"false",privacy?"true":"false",generic?"true":"false",scope?"true":"false",independent?"true":"false",failure?"true":"false",unknown?"true":"false",(unsigned long)wcslen(first),all_languages?"true":"false",max_translated);
     fclose(f);return passed?0:1;
 }

@@ -13,7 +13,7 @@ static APP_NOTIFY_ICON tray_data;
 static int tray_registered,tray_state=-1;
 static UINT tray_taskbar_created;
 static void tray_tooltip(void){
-    const WCHAR *value=last_error?L"三指拖拽 · 已安全停止":(!enabled?L"三指拖拽 · 已暂停":(!device_n?L"三指拖拽 · 等待触控板":L"三指拖拽 · 正在运行"));
+    const WCHAR *value=last_error?app_text(APP_TEXT_TOOLTIP_STOPPED):(!enabled?app_text(APP_TEXT_TOOLTIP_PAUSED):(!device_n?app_text(APP_TEXT_TOOLTIP_WAITING):app_text(APP_TEXT_TOOLTIP_RUNNING)));
     wcscpy(tray_data.tip,value);
 }
 static int tray_ensure(void){

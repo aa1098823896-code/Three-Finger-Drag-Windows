@@ -22,6 +22,7 @@ foreach ($taskName in @('GestureHost', 'GestureSettings')) {
     }
 }
 & (Join-Path $taskNative 'scripts/generate-hand.ps1')
+& (Join-Path $taskNative 'scripts/generate-language.ps1')
 & $taskCompiler -m64 '-Wl,-subsystem=windows' -I $taskSource -o (Join-Path $taskOutput 'GestureHost.exe') (Join-Path $taskSource 'gesture_host.c') (Join-Path $taskSource 'user32-extra.def') -luser32 -lkernel32 -ladvapi32
 if ($LASTEXITCODE -ne 0) { throw 'GestureHost build failed.' }
 & $taskCompiler -m64 '-Wl,-subsystem=windows' -I $taskSource -o (Join-Path $taskOutput 'GestureSettings.exe') (Join-Path $taskSource 'settings_ui.c') -luser32 -lgdi32 -lkernel32 -ladvapi32

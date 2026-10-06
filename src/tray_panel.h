@@ -21,7 +21,7 @@ static int panel_prepare_surface(void);
 static void panel_free_surface(void);
 static BOOL (WINAPI *panel_update)(HWND,HDC,const POINT *,const SIZE *,HDC,const POINT *,COLORREF,const BLENDFUNCTION *,DWORD);
 static const UINT panel_commands[4]={APP_TRAY_GESTURE,APP_TRAY_STARTUP,APP_TRAY_OPEN,APP_TRAY_EXIT};
-static const WCHAR *panel_labels[4]={L"三指拖拽",L"开机启动",L"打开设置",L"退出"};
+static const WCHAR *panel_labels[4];
 static const int panel_rows[4]={5,37,77,107};
 
 static float panel_distance(float x,float y){
@@ -85,7 +85,7 @@ static void panel_command(UINT command){
     if(command==APP_TRAY_GESTURE||command==APP_TRAY_STARTUP){
         item=command==APP_TRAY_STARTUP;success=save_toggle(item,item?!app_startup():!app_enabled());
         settings=FindWindowW(APP_UI_CLASS,0);if(settings)PostMessageW(settings,WM_TIMER,1,0);
-        if(!success)MessageBoxW(panel_window,L"设置没有保存成功，请重新打开程序再试。",L"三指拖拽",MB_OK|MB_ICONERROR);
+        if(!success)MessageBoxW(panel_window,app_text(APP_TEXT_SAVE_ERROR),app_text(APP_TEXT_APP_NAME),MB_OK|MB_ICONERROR);
     }else if(command==APP_TRAY_OPEN||command==APP_TRAY_EXIT){
         core=FindWindowW(APP_HOST_CLASS,0);if(core){GetWindowThreadProcessId(core,&process);AllowSetForegroundWindow(process);PostMessageW(core,WM_COMMAND,command,0);}
     }else return;
@@ -152,11 +152,12 @@ static int panel_prepare_surface(void){
 }
 static int run_tray_menu(HINSTANCE instance){
     WNDCLASSW wc;HANDLE mutex;POINT cursor;MONITORINFO monitor;UINT (WINAPI *window_dpi)(HWND);MSG message;int i,x,y,result=1;WCHAR accessible[48];
+    panel_labels[0]=app_text(APP_TEXT_TRAY_DRAG);panel_labels[1]=app_text(APP_TEXT_TRAY_STARTUP);panel_labels[2]=app_text(APP_TEXT_TRAY_SETTINGS);panel_labels[3]=app_text(APP_TEXT_TRAY_EXIT);
     mutex=CreateMutexW(0,TRUE,L"Local\\ThreeFingerDrag-Native-TrayMenu");if(!mutex)return 1;if(GetLastError()==ERROR_ALREADY_EXISTS){CloseHandle(mutex);return 0;}
     memset(&wc,0,sizeof(wc));wc.lpfnWndProc=panel_proc;wc.hInstance=instance;wc.lpszClassName=APP_TRAY_MENU_CLASS;wc.hCursor=LoadCursorW(0,IDC_ARROW);
     if(!RegisterClassW(&wc))goto cleanup;
     GetCursorPos(&cursor);
-    panel_window=CreateWindowExW(WS_EX_LAYERED|WS_EX_TOOLWINDOW|WS_EX_TOPMOST,wc.lpszClassName,L"三指拖拽快捷菜单",WS_POPUP,cursor.x,cursor.y,1,1,0,0,instance,0);if(!panel_window)goto cleanup;
+    panel_window=CreateWindowExW(WS_EX_LAYERED|WS_EX_TOOLWINDOW|WS_EX_TOPMOST,wc.lpszClassName,app_text(APP_TEXT_TRAY_NAME),WS_POPUP,cursor.x,cursor.y,1,1,0,0,instance,0);if(!panel_window)goto cleanup;
     window_dpi=(void*)GetProcAddress(GetModuleHandleW(L"user32.dll"),"GetDpiForWindow");if(window_dpi)panel_dpi=window_dpi(panel_window);if(!panel_dpi)panel_dpi=96;
     panel_update=(void*)GetProcAddress(GetModuleHandleW(L"user32.dll"),"UpdateLayeredWindow");if(!panel_update)goto cleanup;
     if(!graphics_init()||!init_text())goto cleanup;
@@ -173,7 +174,7 @@ static int run_tray_menu(HINSTANCE instance){
     }
     if(i==3||!panel_prepare_surface())goto cleanup;
     for(i=0;i<4;i++){
-        if(i<2)_snwprintf(accessible,48,L"%s，%s",panel_labels[i],(i==0?app_enabled():app_startup())?L"已开启":L"已关闭");else wcscpy(accessible,panel_labels[i]);
+        if(i<2)_snwprintf(accessible,48,L"%s，%s",panel_labels[i],(i==0?app_enabled():app_startup())?app_text(APP_TEXT_ON):app_text(APP_TEXT_OFF));else wcscpy(accessible,panel_labels[i]);
         panel_buttons[i]=CreateWindowExW(WS_EX_TRANSPARENT,L"BUTTON",accessible,WS_CHILD|WS_VISIBLE|BS_OWNERDRAW,MulDiv(PANEL_MARGIN+5,panel_dpi,96),MulDiv(PANEL_MARGIN+panel_rows[i],panel_dpi,96),MulDiv(PANEL_WIDTH-10,panel_dpi,96),MulDiv(i<2?32:30,panel_dpi,96),panel_window,(HMENU)(ULONG_PTR)panel_commands[i],instance,0);
         if(!panel_buttons[i])goto cleanup;
         {WNDPROC base=(WNDPROC)SetWindowLongPtrW(panel_buttons[i],GWLP_WNDPROC,(LONG_PTR)panel_button_proc);if(!base)goto cleanup;if(!panel_button_base)panel_button_base=base;}

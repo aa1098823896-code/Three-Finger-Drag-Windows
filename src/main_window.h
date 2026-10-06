@@ -156,8 +156,8 @@ static void main_place_caption(HWND hwnd){
 }
 static int main_create_caption(HWND hwnd){
     HINSTANCE instance=(HINSTANCE)GetWindowLongPtrW(hwnd,GWLP_HINSTANCE);
-    main_min_button=CreateWindowExW(WS_EX_TRANSPARENT,L"BUTTON",L"最小化",WS_CHILD|WS_VISIBLE|BS_OWNERDRAW,0,0,1,1,hwnd,(HMENU)6101,instance,0);
-    main_close_button=CreateWindowExW(WS_EX_TRANSPARENT,L"BUTTON",L"关闭",WS_CHILD|WS_VISIBLE|BS_OWNERDRAW,0,0,1,1,hwnd,(HMENU)6102,instance,0);
+    main_min_button=CreateWindowExW(WS_EX_TRANSPARENT,L"BUTTON",app_text(APP_TEXT_MINIMIZE),WS_CHILD|WS_VISIBLE|BS_OWNERDRAW,0,0,1,1,hwnd,(HMENU)6101,instance,0);
+    main_close_button=CreateWindowExW(WS_EX_TRANSPARENT,L"BUTTON",app_text(APP_TEXT_CLOSE),WS_CHILD|WS_VISIBLE|BS_OWNERDRAW,0,0,1,1,hwnd,(HMENU)6102,instance,0);
     if(!main_min_button||!main_close_button)return 0;
     main_caption_base=(WNDPROC)SetWindowLongPtrW(main_min_button,GWLP_WNDPROC,(LONG_PTR)main_caption_button_proc);
     if(!main_caption_base||!SetWindowLongPtrW(main_close_button,GWLP_WNDPROC,(LONG_PTR)main_caption_button_proc))return 0;
@@ -351,7 +351,7 @@ static void main_card(int index){
     if(index!=2)graphics_check(GdipDrawPath(graphics,main_card_border_pen,main_card_paths[index]));
 }
 static void main_paint(HDC dc,int unit,int ox,int oy){
-    int i;const int tiles[3]={38,191,342};const WCHAR *captions[3]={L"三指轻触",L"拖动移动",L"松手完成"};
+    int i;const int tiles[3]={38,191,342};const WCHAR *captions[3]={app_text(APP_TEXT_STEP_TOUCH),app_text(APP_TEXT_STEP_MOVE),app_text(APP_TEXT_STEP_RELEASE)};
     if(!main_background_prefilled)graphics_check(main_fill_rect(graphics,main_background,UI_ORIGIN_X,UI_ORIGIN_Y,UI_WIDTH/(float)UI_LAYOUT_SCALE,UI_HEIGHT/(float)UI_LAYOUT_SCALE));
     main_brand(UI_BRAND_X,UI_BRAND_Y,UI_BRAND_SIZE,1,unit,ox,oy);
     main_psd_transform(main_psd_status_pill,unit,ox,oy);box(408,43,73,26,13,status_fill,status_fill);
@@ -371,22 +371,22 @@ static void main_paint(HDC dc,int unit,int ox,int oy){
     box(420,520,46,23,12,RGB(215,233,255),RGB(215,233,255));main_tip_check(70,554);main_tip_check(70,575);
     text_sequence=0;
     main_psd_transform(main_psd_title,unit,ox,oy);
-    text(dc,6,103,27,300,42,L"三指拖拽",ink,DT_LEFT);
+    text(dc,6,103,27,300,42,app_text(APP_TEXT_APP_NAME),ink,DT_LEFT);
     main_psd_transform(main_psd_subtitle,unit,ox,oy);
-    text(dc,0,103,68,372,24,L"三根手指，轻触即可拖动。让操作更自然、更高效。",main_muted,DT_LEFT);
+    text(dc,0,103,68,372,24,app_text(APP_TEXT_TAGLINE),main_muted,DT_LEFT);
     main_psd_transform(main_psd_status_text,unit,ox,oy);
     text(dc,0,436,43,42,26,status_label,status_color,DT_CENTER);
     main_transform(unit,ox,oy,0,0,1);
-    text(dc,5,99,110,290,28,L"三指拖拽",ink,DT_LEFT);text(dc,0,99,136,294,22,L"移动窗口、选择文字，无需按下。",main_muted,DT_LEFT);
-    text(dc,5,99,176,290,28,L"开机启动",ink,DT_LEFT);text(dc,0,99,202,294,22,L"开机后自动在托盘运行。",main_muted,DT_LEFT);
-    text(dc,5,42,253,420,28,L"三步上手，轻松拖动",ink,DT_LEFT);
-    text(dc,0,42,279,422,24,L"在窗口标题栏或文字上，使用三根手指轻触并拖动即可。",main_muted,DT_LEFT);
+    text(dc,5,99,110,290,28,app_text(APP_TEXT_DRAG),ink,DT_LEFT);text(dc,0,99,136,294,22,app_text(APP_TEXT_DRAG_DESCRIPTION),main_muted,DT_LEFT);
+    text(dc,5,99,176,290,28,app_text(APP_TEXT_STARTUP),ink,DT_LEFT);text(dc,0,99,202,294,22,app_text(APP_TEXT_STARTUP_DESCRIPTION),main_muted,DT_LEFT);
+    text(dc,5,42,253,420,28,app_text(APP_TEXT_GUIDE_TITLE),ink,DT_LEFT);
+    text(dc,0,42,279,422,24,app_text(APP_TEXT_GUIDE_DESCRIPTION),main_muted,DT_LEFT);
     for(i=0;i<3;i++){const WCHAR *number=i==0?L"1":i==1?L"2":L"3";text(dc,0,tiles[i]+22,393,20,20,number,RGB(255,255,255),DT_CENTER);text(dc,0,tiles[i]+52,392,83,22,captions[i],ink,DT_LEFT);}
-    text(dc,7,80,447,142,26,main_action_feedback[0].result==1?L"✓ 设置已打开":main_action_feedback[0].result==2?L"打开失败":L"打开系统设置",blue,DT_LEFT);text(dc,8,80,473,146,17,main_action_feedback[0].result==1?L"三指轻扫和点击设为「无」":main_action_feedback[0].result==2?L"请稍后再试一次":L"快速调整鼠标与触控板设置",RGB(110,133,164),DT_LEFT);
-    text(dc,7,316,447,134,26,main_action_feedback[1].result==1?L"✓ 已复制":main_action_feedback[1].result==2?L"复制失败":L"交给 AI 办",RGB(255,255,255),DT_LEFT);text(dc,8,316,473,141,17,main_action_feedback[1].result==1?L"粘贴给能操作电脑的 AI":main_action_feedback[1].result==2?L"请稍后再试一次":L"遇到问题？让 AI 帮你解决",RGB(223,239,255),DT_LEFT);
-    text(dc,7,66,517,264,28,L"首次建议",RGB(20,76,147),DT_LEFT);text(dc,8,420,520,46,23,L"小贴士",RGB(61,112,176),DT_CENTER);
-    text(dc,8,82,544,384,22,setup_steps_visible()||tp_state.ready?L"三指轻扫和点击设为「无」，避免系统手势冲突。":footer,RGB(92,119,155),DT_LEFT);
-    text(dc,8,82,565,384,22,setup_notice_until?footer:L"首次只需改两项；不熟悉就点「交给 AI 办」。",RGB(92,119,155),DT_LEFT);
+    text(dc,7,80,447,142,26,main_action_feedback[0].result==1?app_text(APP_TEXT_SETTINGS_OPENED):main_action_feedback[0].result==2?app_text(APP_TEXT_SETTINGS_FAILED):app_text(APP_TEXT_SETTINGS),blue,DT_LEFT);text(dc,8,80,473,146,17,main_action_feedback[0].result==1?app_text(APP_TEXT_SETTINGS_OPENED_HINT):main_action_feedback[0].result==2?app_text(APP_TEXT_RETRY_HINT):app_text(APP_TEXT_SETTINGS_DESCRIPTION),RGB(110,133,164),DT_LEFT);
+    text(dc,7,316,447,134,26,main_action_feedback[1].result==1?app_text(APP_TEXT_AI_COPIED):main_action_feedback[1].result==2?app_text(APP_TEXT_AI_FAILED):app_text(APP_TEXT_AI),RGB(255,255,255),DT_LEFT);text(dc,8,316,473,141,17,main_action_feedback[1].result==1?app_text(APP_TEXT_AI_COPIED_HINT):main_action_feedback[1].result==2?app_text(APP_TEXT_RETRY_HINT):app_text(APP_TEXT_AI_DESCRIPTION),RGB(223,239,255),DT_LEFT);
+    text(dc,7,66,517,264,28,app_text(APP_TEXT_FIRST_TIPS),RGB(20,76,147),DT_LEFT);text(dc,8,420,520,46,23,app_text(APP_TEXT_TIPS),RGB(61,112,176),DT_CENTER);
+    text(dc,8,82,544,384,22,setup_steps_visible()||tp_state.ready?app_text(APP_TEXT_TIP_SETUP):footer,RGB(92,119,155),DT_LEFT);
+    text(dc,8,82,565,384,22,setup_notice_until?footer:app_text(APP_TEXT_TIP_AI),RGB(92,119,155),DT_LEFT);
     if(window){SetPropW(window,L"ThreeFingerDrag-LogicalWidth",(HANDLE)(ULONG_PTR)UI_WIDTH);SetPropW(window,L"ThreeFingerDrag-LogicalHeight",(HANDLE)(ULONG_PTR)UI_HEIGHT);SetPropW(window,L"ThreeFingerDrag-GuideVisible",(HANDLE)(ULONG_PTR)2);}
 }
 #endif

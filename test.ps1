@@ -7,6 +7,7 @@ if (-not $CompilerPath) {
     else { $CompilerPath = (Get-Command tcc.exe -ErrorAction Stop).Source }
 }
 $taskCompiler = (Resolve-Path -LiteralPath $CompilerPath -ErrorAction Stop).ProviderPath
+& (Join-Path $PSScriptRoot 'scripts/generate-language.ps1')
 $taskSource = Join-Path $PSScriptRoot 'src'
 $taskTests = Join-Path $PSScriptRoot 'tests'
 $taskResults = Join-Path $PSScriptRoot 'build/tests'
@@ -17,7 +18,8 @@ $taskProbes = @(
     @{ Source = 'gesture_release_probe.c'; Report = 'release-rearm-after.json' },
     @{ Source = 'normal_lift_probe.c'; Report = 'normal-lift-regression.json' },
     @{ Source = 'ai_prompt_probe.c'; Report = 'ai-prompt-privacy.json' },
-    @{ Source = 'window_geometry_probe.c'; Report = 'window-geometry-regression.json' }
+    @{ Source = 'window_geometry_probe.c'; Report = 'window-geometry-regression.json' },
+    @{ Source = 'language_probe.c'; Report = 'language-regression.json' }
 )
 foreach ($taskProbe in $taskProbes) {
     $taskExe = Join-Path $taskResults ([IO.Path]::GetFileNameWithoutExtension($taskProbe.Source) + '.exe')
@@ -28,6 +30,7 @@ foreach ($taskProbe in $taskProbes) {
     $taskReport = Get-Content -LiteralPath (Join-Path $taskResults $taskProbe.Report) -Raw -ErrorAction Stop | ConvertFrom-Json
     if ($taskReport.RealInputCalls -ne 0) { throw 'Regression must not inject real input.' }
     if ($taskProbe.Source -eq 'normal_lift_probe.c' -and -not $taskReport.Passed) { throw 'Lift regression did not pass.' }
+    if ($taskProbe.Source -eq 'language_probe.c' -and (-not $taskReport.Passed -or $taskReport.LanguageCount -ne 9 -or $taskReport.ConfigWrites -ne 0)) { throw 'Language routing regression did not pass.' }
     if ($taskProbe.Source -eq 'window_geometry_probe.c' -and (-not $taskReport.Passed -or -not $taskReport.PrivateDesktop -or -not $taskReport.StationaryCornerStable -or -not $taskReport.MonotonicResize -or -not $taskReport.CrossMonitorAnchorPreserved -or -not $taskReport.AspectRatioPreserved -or -not $taskReport.MinimumSizePreserved -or $taskReport.MaxAnchorDriftPixels -gt 1)) { throw 'Window geometry regression did not pass.' }
     if ($taskProbe.Source -eq 'ai_prompt_probe.c' -and (-not $taskReport.Passed -or -not $taskReport.UserClipboardUntouched -or -not $taskReport.NoPersonalPaths -or -not $taskReport.NoPathNeeded -or -not $taskReport.DifferentLocalPathsProduceSamePrompt -or -not $taskReport.UnavailableDetectionShownAsUnknown -or $taskReport.PromptCharacters -gt 300)) { throw 'Prompt privacy regression did not pass.' }
     if ($taskProbe.Source -eq 'gesture_release_probe.c' -and (-not $taskReport.SimulatedOnly -or $taskReport.DuplicateAfterDeadlineRelease -or $taskReport.DuplicateAfterPartialLift -or $taskReport.DuplicateOnStationaryTail -or -not $taskReport.FreshContactRecovery -or $taskReport.FreshStationaryContactsRestarted -or -not $taskReport.Repeated100FreshGestures)) { throw 'Release regression did not pass.' }
