@@ -1,6 +1,6 @@
 # 三指拖拽 · Three-Finger Drag for Windows
 
-发布准备中：[GitHub 仓库](https://github.com/aa1098823896-code/Three-Finger-Drag-Windows)已建立，目前为私有空仓库。源码和程序包仅保存在本地，尚未上传或对外发布。
+发布准备中：[GitHub 仓库](https://github.com/aa1098823896-code/Three-Finger-Drag-Windows)目前为私有仓库，用于保存源码与版本记录。程序包尚未上传或对外发布。
 
 轻量的 Windows 三指拖拽工具。三根手指轻触触控板并移动，即可移动窗口、选择文字、框选文件或桌面图标、框选截图区域、拖放文件与图片、调整窗口大小；**不需要重按触控板**，松手即结束。
 
