@@ -41,6 +41,7 @@ static void main_art_free(void){
 }
 static void main_segment(void *path,float x,float y,float xx,float yy){graphics_check(main_add_line(path,x,y,xx,yy));}
 static void main_curve(void *path,float x,float y,float a,float b,float c,float d,float xx,float yy){graphics_check(main_add_bezier(path,x,y,a,b,c,d,xx,yy));}
+#include "tutorial_hand.h"
 static void main_polygon(void *path,const float *points,int count){
     int i;for(i=0;i<count;i++)main_segment(path,points[2*i],points[2*i+1],points[2*((i+1)%count)],points[2*((i+1)%count)+1]);
     graphics_check(GdipClosePathFigure(path));
@@ -53,7 +54,7 @@ static int main_art_init(void){
     const float cursor[]={0,0,0,32,8,25,15,39,22,35,15,22,27,22};
     const float arrow[]={0,8,35,8,35,1,50,12,35,23,35,16,0,16};
     const float cog[]={29,12,27,9,28,6,25,3,22,4,19,3,18,0,14,0,13,3,10,4,7,3,4,6,5,9,3,12,0,13,0,17,3,18,5,21,4,24,7,27,10,26,13,28,14,31,18,31,19,28,22,26,25,27,28,24,27,21,29,18,32,17,32,13};
-    void **paths[]={&main_hand,&main_brand_shape,&main_cursor,&main_spark,&main_gear,&main_power,&main_bulb,&main_arrow,&main_ai_card};int i;int (WINAPI *clone_path)(void *,void **);
+    void **paths[]={&main_hand,&main_brand_shape,&main_cursor,&main_spark,&main_gear,&main_power,&main_bulb,&main_arrow,&main_ai_card};int i;int (WINAPI *clone_path)(void *,void **);int (WINAPI *set_line_join)(void *,int);
     main_native_gradient=(void*)GetProcAddress(GetModuleHandleW(L"gdi32.dll"),"GdiGradientFill");
     main_set_clip_rect=(void*)GetProcAddress(graphics_library,"GdipSetClipRect");main_reset_clip=(void*)GetProcAddress(graphics_library,"GdipResetClip");
     main_save_graphics=(void*)GetProcAddress(graphics_library,"GdipSaveGraphics");main_restore_graphics=(void*)GetProcAddress(graphics_library,"GdipRestoreGraphics");
@@ -61,12 +62,13 @@ static int main_art_init(void){
     main_add_line=(void*)GetProcAddress(graphics_library,"GdipAddPathLine");main_add_bezier=(void*)GetProcAddress(graphics_library,"GdipAddPathBezier");
     main_start_figure=(void*)GetProcAddress(graphics_library,"GdipStartPathFigure");main_add_ellipse=(void*)GetProcAddress(graphics_library,"GdipAddPathEllipse");
     main_line_brush=(void*)GetProcAddress(graphics_library,"GdipCreateLineBrushFromRect");main_fill_rect=(void*)GetProcAddress(graphics_library,"GdipFillRectangle");
-    clone_path=(void*)GetProcAddress(graphics_library,"GdipClonePath");
-    if(!main_add_line||!main_add_bezier||!main_start_figure||!main_add_ellipse||!main_line_brush||!main_fill_rect||!clone_path)return 0;
+    clone_path=(void*)GetProcAddress(graphics_library,"GdipClonePath");set_line_join=(void*)GetProcAddress(graphics_library,"GdipSetPenLineJoin");
+    if(!main_add_line||!main_add_bezier||!main_start_figure||!main_add_ellipse||!main_line_brush||!main_fill_rect||!clone_path||!set_line_join)return 0;
     graphics_error=0;
     graphics_check(GdipCreateSolidFill(graphics_color(RGB(255,255,255)),&main_white));graphics_check(GdipCreateSolidFill(graphics_color(blue),&main_blue));
     if(!main_caption_theme_init())return 0;
     graphics_check(GdipCreatePen1(graphics_color(RGB(99,109,133)),1.8f,2,&main_outline));graphics_check(GdipCreatePen1(graphics_color(RGB(255,255,255)),4,2,&main_cursor_outline));
+    if(main_outline)graphics_check(set_line_join(main_outline,2));
     graphics_check(GdipCreatePen1(graphics_color(blue),2.4f,2,&main_icon_pen));if(main_icon_pen){GdipSetPenStartCap(main_icon_pen,2);GdipSetPenEndCap(main_icon_pen,2);}
     graphics_check(main_line_brush(&area,graphics_color(RGB(250,252,255)),graphics_color(RGB(243,248,255)),1,0,&main_background));
     graphics_check(main_line_brush(&action,graphics_color(RGB(56,145,255)),graphics_color(RGB(20,126,255)),1,0,&main_ai_fill));
@@ -77,12 +79,8 @@ static int main_art_init(void){
     for(i=0;i<3;i++){graphics_check(GdipCreatePath(0,&main_card_paths[i]));if(!main_card_paths[i])return 0;main_round_path(main_card_paths[i],main_card_boxes[i][0],main_card_boxes[i][1],main_card_boxes[i][2],main_card_boxes[i][3],MAIN_CARD_RADIUS);}
     graphics_check(GdipCreatePen1(graphics_color(main_border),1,2,&main_card_border_pen));graphics_check(GdipCreateSolidFill(graphics_color(RGB(232,243,255)),&main_tip_fill));
     main_round_path(main_brand_shape,22,33,11,34,5.5f);main_round_path(main_brand_shape,42,25,11,42,5.5f);main_round_path(main_brand_shape,62,33,11,34,5.5f);
-    /* Three upright fingers and the folded thumb are one cached outline. */
-    main_curve(main_hand,32,107,28,100,18,84,14,74);main_curve(main_hand,14,74,7,60,16,56,23,62);main_segment(main_hand,23,62,29,72);
-    main_segment(main_hand,29,72,29,33);main_curve(main_hand,29,33,29,23,42,23,42,33);main_segment(main_hand,42,33,42,62);
-    main_segment(main_hand,42,62,43,21);main_curve(main_hand,43,21,43,10,56,10,56,21);main_segment(main_hand,56,21,56,62);
-    main_segment(main_hand,56,62,57,31);main_curve(main_hand,57,31,57,21,70,21,70,31);main_segment(main_hand,70,31,70,64);
-    main_curve(main_hand,70,64,75,63,80,67,80,76);main_segment(main_hand,80,76,80,87);main_curve(main_hand,80,87,79,97,75,101,73,107);graphics_check(clone_path(main_hand,&main_hand_outline));GdipClosePathFigure(main_hand);
+    /* Both tutorial tiles reuse the cached contour generated from the shared SVG. */
+    main_hand_art_path(main_hand);graphics_check(clone_path(main_hand,&main_hand_outline));GdipClosePathFigure(main_hand);
     main_polygon(main_cursor,cursor,7);main_polygon(main_arrow,arrow,7);main_polygon(main_gear,cog,32);graphics_check(main_add_ellipse(main_gear,11,10.5f,10,10));
     main_curve(main_spark,12,0,14,8,16,10,24,12);main_curve(main_spark,24,12,16,14,14,16,12,24);main_curve(main_spark,12,24,10,16,8,14,0,12);main_curve(main_spark,0,12,8,10,10,8,12,0);GdipClosePathFigure(main_spark);
     graphics_check(GdipAddPathArc(main_power,0,4,24,24,-50,280));graphics_check(main_start_figure(main_power));main_segment(main_power,12,0,12,14);

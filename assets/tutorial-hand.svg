@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="128" viewBox="0 0 96 128">
+  <defs>
+    <!-- Shared native tutorial contour. Fill closes the wrist; the outline stays open. -->
+    <path id="hand-contour" d="M32 107
+      C28 100 18 84 14 74
+      C7 60 16 56 23 62
+      L29 72
+      L29 33
+      C29 23 42 23 42 33
+      L42 62
+      L43 21
+      C43 10 56 10 56 21
+      L56 62
+      L57 31
+      C57 21 70 21 70 31
+      L70 64
+      C70.55 58 70.9 54 71.4 50
+      C72.05 45.6 74.8 42.2 77.7 42.2
+      C80.5 42.2 82.85 44.8 82.8 48.2
+      C82.55 57.8 82.2 67 82.05 76
+      C82 80 80 83.7 80 87
+      C79 97 75 101 73 107"/>
+  </defs>
+  <use href="#hand-contour" fill="#ffffff"/>
+  <use href="#hand-contour" fill="none" stroke="#636d85" stroke-width="1.8" stroke-linejoin="round"/>
+</svg>

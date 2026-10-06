@@ -63,6 +63,8 @@ v0.1.0 已在一台 Windows 11 25H2（26200.9168）电脑、两块不同 DPI 的
 
 脚本生成 `GestureHost.exe` 和 `GestureSettings.exe`，复用仓库中的 `Gesture.ico`，写入程序图标及版本信息，并运行两组手势模拟回归及提示词隐私回归。构建前请先退出从当前目录运行的程序。
 
+教程手形共用 `assets/tutorial-hand.svg`。构建脚本将其转换为 `tutorial_hand.h` 中的原生矢量路径，两张教程卡片复用同一轮廓；修改手形时只需编辑这个 SVG。
+
 只运行回归，或导出原生界面预览：
 
 ```powershell

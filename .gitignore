@@ -8,6 +8,11 @@
 !/LICENSE
 !/LICENSE.upstream.txt
 !/build.ps1
+!/generate-hand.ps1
+!/tutorial_hand.h
+!/assets/
+/assets/*
+!/assets/tutorial-hand.svg
 !/test.ps1
 !/Set-SettingsBranding.ps1
 !/Gesture.ico

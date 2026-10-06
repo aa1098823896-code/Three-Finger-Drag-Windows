@@ -17,6 +17,7 @@ foreach ($taskName in @('GestureHost', 'GestureSettings')) {
         throw ('Exit the program built in this directory before rebuilding: ' + $taskName)
     }
 }
+& (Join-Path $taskNative 'generate-hand.ps1')
 & $taskCompiler -m64 '-Wl,-subsystem=windows' -o (Join-Path $taskNative 'GestureHost.exe') (Join-Path $taskNative 'gesture_host.c') (Join-Path $taskNative 'user32-extra.def') -luser32 -lkernel32 -ladvapi32
 if ($LASTEXITCODE -ne 0) { throw 'GestureHost build failed.' }
 & $taskCompiler -m64 '-Wl,-subsystem=windows' -o (Join-Path $taskNative 'GestureSettings.exe') (Join-Path $taskNative 'settings_ui.c') -luser32 -lgdi32 -lkernel32 -ladvapi32
