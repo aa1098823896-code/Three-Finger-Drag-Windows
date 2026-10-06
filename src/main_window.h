@@ -206,6 +206,27 @@ static UINT main_window_dpi(HWND hwnd){
     UINT dpi=96;UINT (WINAPI *window_dpi)(HWND)=(void*)GetProcAddress(GetModuleHandleW(L"user32.dll"),"GetDpiForWindow");
     if(window_dpi)dpi=window_dpi(hwnd);return dpi?dpi:96;
 }
+/* Retain the original grab point for the whole native move loop. Repeated DPI
+   changes must never turn an already-rounded offset into the next baseline. */
+static int main_move_active;
+static UINT main_move_edge;
+static RECT main_move_origin;
+static POINT main_move_grab;
+static void main_move_begin(HWND hwnd){
+    main_move_active=GetWindowRect(hwnd,&main_move_origin)&&GetCursorPos(&main_move_grab);
+    main_move_edge=0;
+}
+static void main_move_anchor(RECT *rect,const RECT *origin,POINT grab,POINT cursor){
+    int width=rect->right-rect->left,height=rect->bottom-rect->top;
+    int old_width=origin->right-origin->left,old_height=origin->bottom-origin->top;
+    if(old_width<1||old_height<1)return;
+    rect->left=cursor.x-MulDiv(grab.x-origin->left,width,old_width);
+    rect->top=cursor.y-MulDiv(grab.y-origin->top,height,old_height);
+    rect->right=rect->left+width;rect->bottom=rect->top+height;
+}
+static void main_moving(RECT *rect){
+    POINT cursor;if(main_move_active&&!main_move_edge&&GetCursorPos(&cursor))main_move_anchor(rect,&main_move_origin,main_move_grab,cursor);
+}
 static void main_fit_monitor_rect(const RECT *work,UINT dpi,RECT *rect,int centered){
     int gutter=MulDiv(6,dpi,96),padding=MulDiv(16,dpi,96),ex=2*gutter,ey=gutter;
     int workw=work->right-work->left,workh=work->bottom-work->top,w=rect->right-rect->left-ex,h;
@@ -233,6 +254,10 @@ static void main_refit_window(HWND hwnd){
 static void main_dpi_changed(HWND hwnd,UINT dpi,const RECT *suggested){
     RECT rect=*suggested;MONITORINFO monitor;memset(&monitor,0,sizeof(monitor));monitor.cbSize=sizeof(monitor);
     if(GetMonitorInfoW(MonitorFromRect(&rect,MONITOR_DEFAULTTONEAREST),&monitor))main_fit_monitor_rect(&monitor.rcWork,dpi,&rect,0);
+    /* Work-area position clamping during a drag pulls the window away from the
+       cursor, then the native move loop pulls it back. Keep the cursor anchor
+       instead; the size still fits the destination monitor. */
+    if(main_move_active&&!main_move_edge)main_moving(&rect);
     SetWindowPos(hwnd,0,rect.left,rect.top,rect.right-rect.left,rect.bottom-rect.top,SWP_FRAMECHANGED|SWP_NOZORDER|SWP_NOACTIVATE);
 }
 static void main_window_limits(HWND hwnd,int *extra_x,int *extra_y,int *min_width,int *min_height,MONITORINFO *monitor){
@@ -270,12 +295,21 @@ static void main_constrain_size(HWND hwnd){
     adjusting=1;SetWindowPos(hwnd,0,0,0,w+ex,h+ey,SWP_NOMOVE|SWP_NOZORDER|SWP_NOACTIVATE);adjusting=0;
 }
 static void main_sizing(HWND hwnd,UINT edge,RECT *rect){
-    MONITORINFO monitor;RECT previous;int ex,ey,minw,minh,w,h,previous_w,previous_h,width_drives,center;
-    main_window_limits(hwnd,&ex,&ey,&minw,&minh,&monitor);GetWindowRect(hwnd,&previous);
-    w=rect->right-rect->left-ex;h=rect->bottom-rect->top-ey;previous_w=previous.right-previous.left-ex;previous_h=previous.bottom-previous.top-ey;
-    width_drives=edge==WMSZ_LEFT||edge==WMSZ_RIGHT;
-    if(edge!=WMSZ_TOP&&edge!=WMSZ_BOTTOM&&!width_drives){int dw=w-previous_w,dh=h-previous_h;if(dw<0)dw=-dw;if(dh<0)dh=-dh;width_drives=(LONGLONG)dw*UI_HEIGHT>=(LONGLONG)dh*UI_WIDTH;}
-    if(width_drives){if(w<minw)w=minw;h=MulDiv(w,UI_HEIGHT,UI_WIDTH);}else{if(h<minh)h=minh;w=MulDiv(h,UI_WIDTH,UI_HEIGHT);}
+    MONITORINFO monitor;int ex,ey,minw,minh,w,h,center;
+    main_move_edge=edge;main_window_limits(hwnd,&ex,&ey,&minw,&minh,&monitor);
+    w=rect->right-rect->left-ex;h=rect->bottom-rect->top-ey;
+    if(edge==WMSZ_TOP||edge==WMSZ_BOTTOM){if(h<minh)h=minh;w=MulDiv(h,UI_WIDTH,UI_HEIGHT);}
+    else {
+        if(edge!=WMSZ_LEFT&&edge!=WMSZ_RIGHT){
+            /* Project both cursor dimensions onto the aspect-ratio line. The
+               old per-message choice of a dominant axis oscillated because
+               each corrected rectangle changed the next comparison. */
+            LONGLONG denominator=(LONGLONG)UI_WIDTH*UI_WIDTH+(LONGLONG)UI_HEIGHT*UI_HEIGHT;
+            LONGLONG numerator=(LONGLONG)w*UI_WIDTH*UI_WIDTH+(LONGLONG)h*UI_WIDTH*UI_HEIGHT;
+            w=(int)((numerator+denominator/2)/denominator);
+        }
+        if(w<minw)w=minw;h=MulDiv(w,UI_HEIGHT,UI_WIDTH);
+    }
     w+=ex;h+=ey;
     if(edge==WMSZ_LEFT||edge==WMSZ_TOPLEFT||edge==WMSZ_BOTTOMLEFT)rect->left=rect->right-w;
     else if(edge==WMSZ_TOP||edge==WMSZ_BOTTOM){center=(rect->left+rect->right)/2;rect->left=center-w/2;rect->right=rect->left+w;}

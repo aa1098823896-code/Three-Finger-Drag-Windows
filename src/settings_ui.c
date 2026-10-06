@@ -279,6 +279,8 @@ static LRESULT CALLBACK proc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
     if(msg==WM_DRAWITEM){DRAWITEMSTRUCT *item=(DRAWITEMSTRUCT*)lp;if(item->CtlID==6101||item->CtlID==6102){main_caption_draw(hwnd,item->hwndItem,item->hDC,item->CtlID==6102,item->itemState);return TRUE;}}
     if(msg==WM_COMMAND){if(LOWORD(wp)==6101){SetFocus(hwnd);ShowWindow(hwnd,SW_MINIMIZE);return 0;}if(LOWORD(wp)==6102){PostMessageW(hwnd,WM_CLOSE,0,0);return 0;}}
     if(msg==WM_GETMINMAXINFO){main_minmax(hwnd,(MINMAXINFO*)lp);return 0;}
+    if(msg==WM_ENTERSIZEMOVE){main_move_begin(hwnd);return 0;}
+    if(msg==WM_MOVING){main_moving((RECT*)lp);return TRUE;}
     if(msg==WM_SIZING){main_sizing(hwnd,(UINT)wp,(RECT*)lp);return TRUE;}
     if(msg==WM_PRINT||msg==WM_PRINTCLIENT){RECT rect;main_surface_present(hwnd);if(msg==WM_PRINT&&(lp&PRF_NONCLIENT)){BitBlt((HDC)wp,0,0,main_surface_width,main_surface_height,frame.dc,0,0,SRCCOPY);main_compositor_snapshot((HDC)wp,main_surface_x,main_surface_y);}else{GetClientRect(hwnd,&rect);BitBlt((HDC)wp,0,0,rect.right,rect.bottom,frame.dc,main_surface_x,main_surface_y,SRCCOPY);main_compositor_snapshot((HDC)wp,0,0);}return 0;}
     if(msg==WM_PAINT){PAINTSTRUCT ps;BeginPaint(hwnd,&ps);EndPaint(hwnd,&ps);main_surface_present(hwnd);return 0;}
@@ -298,7 +300,7 @@ static LRESULT CALLBACK proc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
     if(msg==WM_CAPTURECHANGED&&(HWND)lp!=hwnd&&main_press_source==1){main_feedback_cancel(hwnd,1);return 0;}
     if(msg==WM_CANCELMODE||msg==WM_KILLFOCUS){main_feedback_cancel(hwnd,1);}
     if(msg==WM_CLOSE){request_close(hwnd);return 0;}
-    if(msg==WM_EXITSIZEMOVE){InvalidateRect(hwnd,0,FALSE);UpdateWindow(hwnd);return 0;}
+    if(msg==WM_EXITSIZEMOVE){main_move_active=0;main_move_edge=0;InvalidateRect(hwnd,0,FALSE);UpdateWindow(hwnd);return 0;}
     if(msg==WM_SIZE){if(wp==SIZE_MINIMIZED){main_was_minimized=1;main_feedback_suspend(hwnd);}else{if(main_was_minimized){main_was_minimized=0;main_constrain_size(hwnd);main_refit_window(hwnd);main_feedback_tick();}main_place_caption(hwnd);main_surface_touch(hwnd);}return 0;}
     if(msg==0x02E0){main_dpi_changed(hwnd,LOWORD(wp),(RECT*)lp);main_constrain_size(hwnd);main_place_caption(hwnd);main_surface_touch(hwnd);return 0;}
     if(msg==WM_DISPLAYCHANGE||(msg==WM_SETTINGCHANGE&&wp==SPI_SETWORKAREA)){main_refit_window(hwnd);main_place_caption(hwnd);main_surface_touch(hwnd);if(msg==WM_DISPLAYCHANGE)return 0;}

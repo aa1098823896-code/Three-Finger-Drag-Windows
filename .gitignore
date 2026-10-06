@@ -37,6 +37,7 @@
 !/tests/gesture_release_probe.c
 !/tests/normal_lift_probe.c
 !/tests/ai_prompt_probe.c
+!/tests/window_geometry_probe.c
 !/scripts/
 /scripts/*
 !/scripts/generate-hand.ps1
