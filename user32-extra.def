@@ -1,0 +1,7 @@
+LIBRARY user32.dll
+EXPORTS
+GetRawInputDeviceInfoW
+GetRawInputDeviceList
+GetRawInputData
+RegisterRawInputDevices
+GetLastInputInfo

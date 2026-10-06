@@ -1,0 +1,31 @@
+# Track only reviewed source, shared assets and public documentation.
+# Local traces, binaries, compiler, PSDs and backups remain in this directory.
+/*
+!/.gitignore
+!/.gitattributes
+!/README.md
+!/CHANGELOG.md
+!/LICENSE
+!/LICENSE.upstream.txt
+!/build.ps1
+!/test.ps1
+!/Set-SettingsBranding.ps1
+!/Gesture.ico
+!/release-manifest.json
+!/gesture_host.c
+!/settings_ui.c
+!/gesture_release_probe.c
+!/normal_lift_probe.c
+!/user32-extra.def
+!/app_shared.h
+!/compositor_api.h
+!/main_caption.h
+!/main_compositor.h
+!/main_feedback.h
+!/main_psd_layout.h
+!/main_surface.h
+!/main_window.h
+!/tray_icon.h
+!/tray_panel.h
+!/touchpad_prepare.h
+!/ui_graphics.h

@@ -1,0 +1,21 @@
+{
+  "version": "v0.1.0",
+  "platform": "windows-x64",
+  "files": [
+    {
+      "name": "GestureHost.exe",
+      "bytes": 34816,
+      "sha256": "1A6D79642A8018BBC7400C63B9F0060C12754B0B1E7979A40F882527119AE7E2"
+    },
+    {
+      "name": "GestureSettings.exe",
+      "bytes": 151552,
+      "sha256": "96BBF18308836281B2414A777ECB46188F9404068F2ED948EE0ACD15AEA2C520"
+    },
+    {
+      "name": "Gesture.ico",
+      "bytes": 10670,
+      "sha256": "37897698F315B2FF1E1BF5C20BA77F12AFC80DDB954663315E163C0748906B9B"
+    }
+  ]
+}
