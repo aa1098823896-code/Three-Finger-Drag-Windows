@@ -66,5 +66,13 @@
   "PROMPT_READY": "are set to None",
   "PROMPT_TEMPLATE": "Help me set up three-finger drag. In Windows touchpad settings, set three-finger swipes and taps to None. Leave everything else unchanged, including double-tap dragging and pointer speed.\r\n\r\nCheck first and skip settings already correct. Note the original values before changing anything. Afterwards, check Windows settings again and reopen the app to confirm its status. Do not install software, restart the computer or close other apps.\r\n\r\nIf you cannot operate my computer, say so and give me simple steps to do it myself.\r\n\r\n%s",
   "TRAY_DRAG": "3-finger drag",
-  "TRAY_STARTUP": "Autostart"
+  "TRAY_STARTUP": "Autostart",
+  "TIP_RUNNING_TOUCH": "Rest three fingers and slide. No need to press down.",
+  "TIP_RUNNING_RELEASE": "Lift to finish. Closing this window keeps the tray app running.",
+  "TIP_CHECK_TITLE": "Check needed",
+  "TIP_COPIED_TITLE": "Prompt copied",
+  "TIP_COPIED_PASTE": "On your clipboard. Paste into an AI chat and send.",
+  "TIP_COPIED_HELP": "Choose an AI that can operate your PC to set up the two gestures.",
+  "TIP_MANUAL": "Or open Windows settings and change the two gestures yourself.",
+  "TIP_SETTINGS_TITLE": "Windows settings opened"
 }

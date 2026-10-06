@@ -66,5 +66,13 @@
   "PROMPT_READY": "deaktiviert",
   "PROMPT_TEMPLATE": "Richte Dreifingerziehen ein. Deaktiviere Dreifinger-Wischen und -Tippen in den Windows-Touchpad-Einstellungen. Alles andere unverändert lassen, insbesondere Ziehen durch Doppeltippen und Zeigergeschwindigkeit.\r\n\r\nZuerst prüfen und bereits richtige Einstellungen überspringen. Vor Änderungen die alten Werte notieren. Danach Windows-Einstellungen erneut prüfen und die App öffnen, um den Status zu bestätigen. Keine Software installieren, den Computer nicht neu starten und keine anderen Apps schließen.\r\n\r\nFalls du den Computer nicht bedienen kannst, sage es und erkläre einfache Schritte zum Selbermachen.\r\n\r\n%s",
   "TRAY_DRAG": "3-Finger-Zug",
-  "TRAY_STARTUP": "Autostart"
+  "TRAY_STARTUP": "Autostart",
+  "TIP_RUNNING_TOUCH": "Drei Finger leicht auflegen und gleiten lassen. Nicht drücken.",
+  "TIP_RUNNING_RELEASE": "Zum Beenden loslassen. Beim Schließen läuft die App im Infobereich weiter.",
+  "TIP_CHECK_TITLE": "Bitte prüfen",
+  "TIP_COPIED_TITLE": "Prompt kopiert",
+  "TIP_COPIED_PASTE": "In der Zwischenablage. In einen KI-Chat einfügen und senden.",
+  "TIP_COPIED_HELP": "Eine KI mit PC-Zugriff kann die beiden Gesten einrichten.",
+  "TIP_MANUAL": "Oder die beiden Gesten in den Windows-Einstellungen selbst ändern.",
+  "TIP_SETTINGS_TITLE": "Windows-Einstellungen geöffnet"
 }

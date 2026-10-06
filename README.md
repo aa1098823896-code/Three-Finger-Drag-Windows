@@ -1,6 +1,6 @@
 # 三指拖拽 · Three-Finger Drag for Windows
 
-发布准备中：[GitHub 仓库](https://github.com/aa1098823896-code/Three-Finger-Drag-Windows)目前为私有仓库，用于保存源码与版本记录。程序包尚未上传或对外发布。
+[下载正式版 v1.0.0](https://github.com/aa1098823896-code/Three-Finger-Drag-Windows/releases/tag/v1.0.0) · [English instructions](#english)
 
 轻量的 Windows 三指拖拽工具。三根手指轻触触控板并移动，即可移动窗口、选择文字、框选文件或桌面图标、框选截图区域、拖放文件与图片、调整窗口大小；**不需要重按触控板**，松手即结束。
 
@@ -8,15 +8,30 @@
 
 ## 下载安装
 
-1. 正式发布后，在本仓库的 [Releases](https://github.com/aa1098823896-code/Three-Finger-Drag-Windows/releases) 下载 `three-finger-drag-v0.1.1-windows-x64.zip`。
-2. 解压到一个固定目录，保持所有文件在一起。开机启动会使用该目录，启用后请勿随意移动。
-3. 双击 `GestureSettings.exe`，打开「三指拖拽」。首次使用完成下面两项系统设置。
+1. 在 [Releases](https://github.com/aa1098823896-code/Three-Finger-Drag-Windows/releases/latest) 下载 `three-finger-drag-v1.0.0-windows-x64.zip`，解压。
+2. 在解压目录打开 PowerShell，运行下面这一行。安装脚本先核对文件 SHA-256，再安装到当前用户的程序目录，无需管理员权限。
 
-这是便携版，不需要 .NET、Windows App SDK 或额外运行框架。尚未提供安装向导。两个程序合计约 182 KiB；这表示文件体积，不代表内存占用。
+   ```powershell
+   powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Install.ps1
+   ```
+
+3. 安装后打开「三指拖拽」，首次使用完成下面两项系统设置。首次安装默认开机启动；更新时保留已有开关、开机启动和窗口位置。
+
+也可以保持文件在一起，直接运行 `GestureSettings.exe` 使用便携版；启用开机启动后请勿随意移动目录。Windows 可能提示来自网络的脚本或未签名程序，请先核对下载来源和校验值；本项目没有付费签名证书。
+
+不需要 .NET、Windows App SDK 或额外运行框架。两个程序合计约 246 KiB；这表示文件体积，不代表内存占用。安装包还包含共享图标、安装脚本、校验清单与许可。
+
+## 交给自己的 Agent 安装
+
+将下面这段话发送给**能够操作 Windows 电脑的 Agent（AI 助手）**即可。安装脚本负责安装和更新，Agent 负责确认设备和那两项系统设置：
+
+> 请从 https://github.com/aa1098823896-code/Three-Finger-Drag-Windows/releases/latest 下载 Windows x64 正式安装包，核对 SHA256SUMS.txt，解压并检查包内 Install.ps1 后运行。确认这台电脑是 Windows 11 24H2 或更新的 x64 系统，有支持三指的精确触控板。在系统触控板设置中，把三指轻扫和三指点击设为“无”，已完成的就跳过。其他设置保持原样，不要关闭双击拖动，不要改指针速度。修改前记下原值，完成后重新打开软件检查状态，并让我试一次三指轻触拖动。若不能操作电脑，请直接说明，并教我最简单的手动步骤。
+
+Agent 不需要安装额外框架，也不应为此修改全局脚本策略、重启电脑或结束无关程序。**安装成功不等于系统手势已经适配好**：那两项设置和一次实际拖动仍要确认。
 
 ## 首次设置：只改两项
 
-需要 **Windows 精确触控板（Precision Touchpad）**，支持至少三指，且系统触控板开关已打开。当前发布包面向 Windows 11 x64。
+需要 **Windows 精确触控板（Precision Touchpad）**，支持至少三指，且系统触控板开关已打开。当前发布包面向 Windows 11 24H2 及更新版本的 x64 系统，不提供 ARM64 包。
 
 点击程序的「打开系统设置」，或进入 **设置 → 蓝牙和设备 → 触摸板 → 三指手势**：
 
@@ -39,17 +54,17 @@
 - 设置窗口按屏幕 DPI 绘制，默认大小为 684 × 850 逻辑像素；拉大保持比例，工作区不足时等比例缩小。
 - 遇到按键未释放，可用 `Ctrl+Alt+Pause` 暂停拖拽并释放按键。
 
-更新或回退版本时，先从托盘退出，再替换程序文件并重新打开设置。如果换了存放目录，请在新目录启动后重新启用「开机启动」。
+更新时解压新包并运行 `Install.ps1`，脚本会正常关闭旧程序、备份原文件、核对替换结果并重新启动。备份放在安装目录的 `.previous/` 中，个人备份不需要上传到 GitHub。便携版手动更新时，先从托盘退出再替换文件。
 
 设置保存于 `%LOCALAPPDATA%\ThreeFingerDragNative`。不再使用时，先关闭「开机启动」，再从托盘退出即可。
 
 ## 验证范围
 
-v0.1.0 已在一台 Windows 11 25H2（26200.9168）电脑、两块不同 DPI 的屏幕上验证。用户实测确认：使用 `Win+Shift+S` 后三指框选只完成一次截图，`Esc` 可以正常取消。
+v1.0.0 已在一台 Windows 11 25H2（26200.9168）电脑、两块不同 DPI 的屏幕上验证。用户实测确认：四角缩放和跨屏往返拖动正常；使用 `Win+Shift+S` 后三指框选只完成一次截图，`Esc` 可以正常取消；九种语言的排版已确认。
 
 模拟回归覆盖正常抬指、混合触控报告、同一批触点尾帧防重复、复用触点 ID，以及连续 100 次手势。这些检查不注入真实输入，不能代替其他型号触控板的实际验证。目前没有覆盖所有 Windows 版本和设备。
 
-教程手形已补齐五指，并修顺小拇指到掌缘的轮廓，保留原来的姿势、三指接触位置与画风。教程动效计划放在仓库说明中，软件保留当前卡片布局。
+教程手形已补齐五指，并修顺小拇指到掌缘的轮廓，保留原来的姿势、三指接触位置与画风。软件保留当前卡片布局。
 
 ## 界面语言
 
@@ -98,16 +113,48 @@ test.ps1        测试入口
 
 ## 版本与回退
 
-`main` 保存已验收的代码，当前包含修正后的五指教程手形。`v0.1.0` 保留原始固定基线，`v0.1.1` 保留移除 AI 提示词个人路径后的基线。每项后续修改在独立分支完成，验收后再合并。
+`main` 保存已验收的代码；`v1.0.0` 是首个正式公开版本。开发期的两个版本标记已撤下。每项后续修改在独立分支完成，验收后再合并。
 
 查看旧版而保留当前目录，可以创建另一个检出目录：
 
 ```powershell
-git worktree add --detach ..\three-finger-drag-v0.1.0 v0.1.0
+git worktree add --detach ..\three-finger-drag-v1.0.0 v1.0.0
 ```
 
-正式发布后，需要直接回到已验证的运行程序时，可以使用对应版本的 Release 包。当前 `docs/release-manifest.json` 记录 `v0.1.1` 准备包中程序和图标的 SHA-256。
+需要回到正式版时，可以使用对应的 Release 包。`docs/release-manifest.json` 记录正式包的程序、图标和安装脚本 SHA-256；Release 的 `SHA256SUMS.txt` 用于核对下载压缩包。
 
 ## 许可与来源
 
 采用 [MIT License](LICENSE)。手势识别参考 [ThreeFingerDragOnWindows 2.0.7](https://github.com/ClementGre/ThreeFingerDragOnWindows/tree/2.0.7)，保留 Clément Grennerat 的版权和[原始许可](docs/LICENSE.upstream.txt)。本仓库包含原生后台、Win32 设置界面及相应修改；没有分发原版应用安装包或编译器。
+
+## English
+
+Lightweight three-finger drag for Windows precision touchpads. Move windows, select text, box-select files or screenshot areas, drag and drop, and resize windows. **Rest three fingers and slide; you do not need to press down.** Lift your fingers to finish. Movement follows the Windows pointer speed.
+
+### Install
+
+Windows 11 24H2 or later, x64, and a precision touchpad supporting at least three fingers are required. ARM64 is not supported by this package.
+
+Download `three-finger-drag-v1.0.0-windows-x64.zip` from [Releases](https://github.com/aa1098823896-code/Three-Finger-Drag-Windows/releases/latest), verify `SHA256SUMS.txt`, and extract it. Review `Install.ps1`, then run this command from the extracted folder:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Install.ps1
+```
+
+The script verifies the files and installs for the current user without administrator privileges. A first installation enables startup at sign-in. Updates preserve your settings and back up the old files. You can also run `GestureSettings.exe` directly as a portable app. No extra runtime is required. The executables are not code-signed.
+
+### Let your Agent handle setup
+
+Send this to an Agent that can operate your Windows computer:
+
+> Download the latest Windows x64 release from https://github.com/aa1098823896-code/Three-Finger-Drag-Windows/releases/latest, verify SHA256SUMS.txt, extract it, review Install.ps1, and run it. Confirm Windows 11 24H2 or later and a precision touchpad supporting three fingers. In Windows touchpad settings, set three-finger Swipes and Taps to Nothing, skipping settings already correct. Preserve all other settings, especially double-tap dragging and pointer speed. Record the previous values, reopen the app to check its status, and ask me to try a light three-finger drag. If you cannot operate my computer, tell me and give me the shortest manual steps.
+
+Installation does not automatically change Windows gestures. Manually, go to **Settings → Bluetooth & devices → Touchpad → Three-finger gestures**, and set both **Swipes** and **Taps** to **Nothing**. Do not disable double-tap dragging. The app's **Ask AI** button copies setup instructions; paste them into an AI chat and send them yourself.
+
+### Language and use
+
+The app reads your Windows display language at startup: Simplified Chinese, Traditional Chinese, English, Japanese, Korean, German, French, Spanish, and Portuguese. Other languages use English. There is no language selector. After changing the Windows display language, restart the app. Region and keyboard settings do not select the UI language. This README offers Chinese and English instructions; GitHub does not select a translated README for you.
+
+Closing the settings window keeps the tray app running. Right-click its blue icon to toggle dragging, change startup behavior, open settings, or quit. To recover from a stuck gesture, press `Ctrl+Alt+Pause`; it pauses dragging and releases held input.
+
+This release was tested on one Windows 11 computer with two monitors at different DPI settings. Other touchpad models still need real-device validation. Report problems with your Windows version and touchpad model; do not include your private installation backup or personal paths.

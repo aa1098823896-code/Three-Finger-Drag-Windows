@@ -66,5 +66,13 @@
   "PROMPT_READY": "desactivados",
   "PROMPT_TEMPLATE": "Ayúdame a configurar el arrastre con tres dedos. Desactiva los deslizamientos y toques con tres dedos en los ajustes del panel táctil de Windows. No cambies nada más, sobre todo el arrastre con doble toque ni la velocidad del puntero.\r\n\r\nComprueba primero y omite lo que ya esté bien. Anota los valores originales antes de cambiar nada. Después, revisa de nuevo los ajustes de Windows y abre la app para confirmar su estado. No instales software, no reinicies ni cierres otras apps.\r\n\r\nSi no puedes manejar mi ordenador, dilo y dame pasos sencillos para hacerlo yo mismo.\r\n\r\n%s",
   "TRAY_DRAG": "3 dedos",
-  "TRAY_STARTUP": "Autoinicio"
+  "TRAY_STARTUP": "Autoinicio",
+  "TIP_RUNNING_TOUCH": "Apoya tres dedos y desliza, sin presionar.",
+  "TIP_RUNNING_RELEASE": "Levanta los dedos para terminar. Al cerrar, la app sigue en la bandeja.",
+  "TIP_CHECK_TITLE": "Revisión necesaria",
+  "TIP_COPIED_TITLE": "Instrucciones copiadas",
+  "TIP_COPIED_PASTE": "En el portapapeles. Pega en un chat de IA y envía.",
+  "TIP_COPIED_HELP": "Elige una IA que pueda manejar tu PC para configurar los dos gestos.",
+  "TIP_MANUAL": "O cambia tú los dos gestos en la configuración de Windows.",
+  "TIP_SETTINGS_TITLE": "Configuración de Windows abierta"
 }

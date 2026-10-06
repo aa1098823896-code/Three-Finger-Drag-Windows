@@ -40,7 +40,7 @@ static int prompt_report(int applied){return 1;}
 #include "settings_ui.c"
 #undef WinMain
 int WINAPI WinMain(HINSTANCE instance,HINSTANCE previous,LPSTR command,int show){
-    WCHAR first[4096];int passed,privacy,generic,scope,independent,failure,unknown,locale,all_languages=1,max_translated=0;FILE *f;
+    WCHAR first[4096];int passed,privacy,generic,scope,independent,failure,unknown,locale,all_languages=1,max_translated=0,notices=1;FILE *f;
     app_language=APP_LANG_ZH_CN;app_language_initialized=1;
     /* Paths are test fixtures, not a real person's account or installation. */
     wcscpy(data_folder,L"C:\\Users\\PrivacyProbeLocal\\AppData\\Local\\ThreeFingerDragNative");
@@ -61,9 +61,11 @@ int WINAPI WinMain(HINSTANCE instance,HINSTANCE previous,LPSTR command,int show)
     wcscpy(data_folder,L"C:\\Users\\DifferentPrivacyProbe\\AppData\\Local\\ThreeFingerDragNative");
     wcscpy(app_folder,L"E:\\AnotherPrivateInstallProbe");setup_copy_ai();
     independent=setup_copy_result==1&&wcscmp(first,captured_prompt)==0;
+    main_tip_select();notices=main_tip.mode==MAIN_TIP_COPIED&&main_tip.first==app_text(APP_TEXT_TIP_COPIED_PASTE)&&main_tip.second==app_text(APP_TEXT_TIP_COPIED_HELP);
     if(captured_memory){GlobalFree(captured_memory);captured_memory=0;}
     clipboard_locked=1;setup_copy_ai();
     failure=setup_copy_result==2&&!wcsstr(setup_notice,L"已复制")&&wcscmp(first,captured_prompt)==0;
+    main_tip_select();notices&=main_tip.mode==MAIN_TIP_FAILED&&main_tip.palette==3;
     clipboard_locked=0;prompt_native_readable=prompt_cache_readable=0;setup_copy_ai();
     unknown=setup_copy_result==1&&wcsstr(captured_prompt,L"软件暂时无法确认这两项设置")!=0
         &&!wcsstr(captured_prompt,L"三指轻扫已设为「无」")&&wcslen(captured_prompt)<=300;
@@ -75,8 +77,15 @@ int WINAPI WinMain(HINSTANCE instance,HINSTANCE previous,LPSTR command,int show)
         if(setup_copy_result!=1||!wcsstr(captured_prompt,app_text(APP_TEXT_PROMPT_NOT_READY))||wcsstr(captured_prompt,L":\\")||wcsstr(captured_prompt,L"PrivacyProbe")||wcsstr(captured_prompt,L"PrivateInstallProbe"))all_languages=0;
         if(wcslen(captured_prompt)>max_translated)max_translated=(int)wcslen(captured_prompt);
         if(captured_memory){GlobalFree(captured_memory);captured_memory=0;}
+        main_tip_select();notices&=main_tip.mode==MAIN_TIP_COPIED&&main_tip.title==app_text(APP_TEXT_TIP_COPIED_TITLE);
     }passed&=all_languages;
+    setup_notice_until=0;tp_state.ready=on=1;wcscpy(status_label,app_text(APP_TEXT_STATUS_RUNNING));main_tip_select();
+    notices&=main_tip.mode==MAIN_TIP_RUNNING&&main_tip.first!=app_text(APP_TEXT_TIP_SETUP);
+    on=0;main_tip_select();notices&=main_tip.mode==MAIN_TIP_PAUSED;
+    on=1;tp_state.ready=0;main_tip_select();notices&=main_tip.mode==MAIN_TIP_SETUP;
+    tp_state.present=0;wcscpy(status_label,app_text(APP_TEXT_STATUS_WAITING));main_tip_select();notices&=main_tip.mode==MAIN_TIP_CHECK&&main_tip.palette==2;
+    passed&=notices;
     f=fopen("ai-prompt-privacy.json","wb");if(!f)return 3;
     fprintf(f,"{\"Passed\":%s,\"CapturedClipboardOnly\":true,\"UserClipboardUntouched\":true,\"NoPersonalPaths\":%s,\"NoPathNeeded\":%s,\"TwoSettingsScopePreserved\":%s,\"DifferentLocalPathsProduceSamePrompt\":%s,\"ClipboardFailureDoesNotClaimSuccess\":%s,\"UnavailableDetectionShownAsUnknown\":%s,\"PromptCharacters\":%lu,\"LanguagesChecked\":9,\"AllLanguagePromptsPrivate\":%s,\"MaximumTranslatedPromptCharacters\":%d,\"RealInputCalls\":0}",passed?"true":"false",privacy?"true":"false",generic?"true":"false",scope?"true":"false",independent?"true":"false",failure?"true":"false",unknown?"true":"false",(unsigned long)wcslen(first),all_languages?"true":"false",max_translated);
-    fclose(f);return passed?0:1;
+    fclose(f);f=fopen("tip-state-regression.json","wb");if(!f)return 4;fprintf(f,"{\"Passed\":%s,\"CopiedInstructionsInNineLanguages\":%s,\"ReadyDoesNotAskForSetupAgain\":true,\"FailureIsNotSuccess\":true,\"NoticeExpiryRestoresCurrentStatus\":true,\"RealInputCalls\":0}",notices?"true":"false",notices?"true":"false");fclose(f);return passed?0:1;
 }

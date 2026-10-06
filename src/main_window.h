@@ -16,7 +16,7 @@ static int (WINAPI *main_set_clip_rect)(void *,float,float,float,float,int);
 static int (WINAPI *main_reset_clip)(void *);
 static int (WINAPI *main_save_graphics)(void *,UINT *);
 static int (WINAPI *main_restore_graphics)(void *,UINT);
-static void *main_card_paths[3],*main_card_border_pen,*main_tip_fill;
+static void *main_card_paths[3],*main_card_border_pen,*main_tip_fill,*main_tip_pen;
 static const int main_card_boxes[3][4]={{20,104,460,132},{20,248,460,178},{20,508,460,88}};
 static void *main_hand,*main_hand_outline,*main_brand_shape,*main_cursor,*main_spark,*main_gear,*main_power,*main_bulb,*main_arrow,*main_ai_card;
 static void *main_white,*main_blue,*main_background,*main_ai_fill,*main_arrow_fill,*main_ai_hot_fill,*main_ai_down_fill,*main_outline,*main_cursor_outline,*main_icon_pen;
@@ -27,6 +27,40 @@ static int main_was_minimized;
    Artwork coordinates stay unchanged; every monitor renders this same DIP size. */
 #define MAIN_DEFAULT_CLIENT_DIP_WIDTH 684
 static const COLORREF main_border=RGB(227,234,244),main_soft=RGB(234,243,255),main_muted=RGB(110,122,145);
+enum MAIN_TIP_MODE {MAIN_TIP_RUNNING,MAIN_TIP_SETUP,MAIN_TIP_PAUSED,MAIN_TIP_CHECK,MAIN_TIP_COPIED,MAIN_TIP_FAILED,MAIN_TIP_SETTINGS};
+static struct {int mode,palette;const WCHAR *title,*first,*second;COLORREF fill,accent,ink,muted,pill;} main_tip;
+static float main_tip_icon_y,main_tip_icon_center;
+static COLORREF main_tip_cached_fill=0xffffffff,main_tip_cached_accent=0xffffffff;
+/* Reuse the existing status and action receipts. No extra polling or worker. */
+static void main_tip_select(void){
+    int notice=setup_notice_until&&(LONG)(setup_notice_until-GetTickCount())>0;
+    main_tip.mode=notice?(setup_notice_result==2?MAIN_TIP_FAILED:setup_notice_action==4?MAIN_TIP_COPIED:MAIN_TIP_SETTINGS)
+        :!on?MAIN_TIP_PAUSED:!wcscmp(status_label,app_text(APP_TEXT_STATUS_RUNNING))&&tp_state.ready?MAIN_TIP_RUNNING
+        :setup_steps_visible()?MAIN_TIP_SETUP:MAIN_TIP_CHECK;
+    main_tip.palette=main_tip.mode==MAIN_TIP_COPIED?0:main_tip.mode==MAIN_TIP_SETUP||main_tip.mode==MAIN_TIP_CHECK?1
+        :main_tip.mode==MAIN_TIP_PAUSED?2:main_tip.mode==MAIN_TIP_FAILED?3:4;
+    if(main_tip.mode==MAIN_TIP_CHECK&&!wcscmp(status_label,app_text(APP_TEXT_STATUS_WAITING)))main_tip.palette=2;
+    if(main_tip.palette==0){main_tip.fill=RGB(234,247,239);main_tip.accent=RGB(31,142,65);main_tip.ink=RGB(30,108,57);main_tip.muted=RGB(80,119,95);main_tip.pill=RGB(215,239,222);}
+    else if(main_tip.palette==1){main_tip.fill=RGB(255,246,231);main_tip.accent=RGB(174,106,16);main_tip.ink=RGB(137,83,13);main_tip.muted=RGB(139,112,71);main_tip.pill=RGB(250,233,201);}
+    else if(main_tip.palette==2){main_tip.fill=RGB(239,241,245);main_tip.accent=RGB(112,122,140);main_tip.ink=RGB(71,81,98);main_tip.muted=RGB(111,120,135);main_tip.pill=RGB(225,229,237);}
+    else if(main_tip.palette==3){main_tip.fill=RGB(255,239,238);main_tip.accent=RGB(194,72,63);main_tip.ink=RGB(156,55,49);main_tip.muted=RGB(151,97,91);main_tip.pill=RGB(249,218,215);}
+    else {main_tip.fill=RGB(232,243,255);main_tip.accent=blue;main_tip.ink=RGB(20,76,147);main_tip.muted=RGB(92,119,155);main_tip.pill=RGB(215,233,255);}
+    if(main_tip.mode==MAIN_TIP_RUNNING){main_tip.title=app_text(APP_TEXT_STATUS_RUNNING);main_tip.first=app_text(APP_TEXT_TIP_RUNNING_TOUCH);main_tip.second=app_text(APP_TEXT_TIP_RUNNING_RELEASE);}
+    else if(main_tip.mode==MAIN_TIP_SETUP||main_tip.mode==MAIN_TIP_SETTINGS){main_tip.title=app_text(main_tip.mode==MAIN_TIP_SETTINGS?APP_TEXT_TIP_SETTINGS_TITLE:APP_TEXT_FIRST_TIPS);main_tip.first=app_text(APP_TEXT_TIP_SETUP);main_tip.second=app_text(APP_TEXT_TIP_AI);}
+    else if(main_tip.mode==MAIN_TIP_COPIED){main_tip.title=app_text(APP_TEXT_TIP_COPIED_TITLE);main_tip.first=app_text(APP_TEXT_TIP_COPIED_PASTE);main_tip.second=app_text(APP_TEXT_TIP_COPIED_HELP);}
+    else if(main_tip.mode==MAIN_TIP_FAILED){main_tip.title=app_text(setup_notice_action==4?APP_TEXT_AI_FAILED:APP_TEXT_SETTINGS_FAILED);main_tip.first=app_text(setup_notice_action==4?APP_TEXT_COPY_ERROR_NOTICE:APP_TEXT_RETRY_HINT);main_tip.second=app_text(APP_TEXT_TIP_MANUAL);}
+    else if(main_tip.mode==MAIN_TIP_PAUSED){main_tip.title=app_text(APP_TEXT_STATUS_PAUSED);main_tip.first=app_text(APP_TEXT_FOOTER_PAUSED);main_tip.second=app_text(APP_TEXT_TIP_RUNNING_RELEASE);}
+    else {main_tip.title=app_text(APP_TEXT_TIP_CHECK_TITLE);main_tip.first=footer;main_tip.second=app_text(APP_TEXT_TIP_AI);}
+}
+static void main_tip_update(void){
+    main_tip_select();
+    if(main_tip_cached_fill!=main_tip.fill){
+        HBRUSH native=CreateSolidBrush(main_tip.fill);if(!native){graphics_error=2;return;}
+        if(main_card_native_tip)DeleteObject(main_card_native_tip);main_card_native_tip=native;
+        graphics_check(GdipSetSolidFillColor(main_tip_fill,graphics_color(main_tip.fill)));main_tip_cached_fill=main_tip.fill;
+    }
+    if(main_tip_cached_accent!=main_tip.accent){graphics_check(GdipSetPenColor(main_tip_pen,graphics_color(main_tip.accent)));main_tip_cached_accent=main_tip.accent;}
+}
 static void main_art_free(void){
     void **paths[]={&main_hand,&main_hand_outline,&main_brand_shape,&main_cursor,&main_spark,&main_gear,&main_power,&main_bulb,&main_arrow,&main_ai_card};
     void **brushes[]={&main_white,&main_blue,&main_background,&main_ai_fill,&main_arrow_fill,&main_ai_hot_fill,&main_ai_down_fill};
@@ -36,6 +70,7 @@ static void main_art_free(void){
     for(i=0;i<3;i++){if(*pens[i])GdipDeletePen(*pens[i]);*pens[i]=0;}
     for(i=0;i<3;i++){if(main_card_paths[i])GdipDeletePath(main_card_paths[i]);main_card_paths[i]=0;}
     if(main_card_border_pen)GdipDeletePen(main_card_border_pen);main_card_border_pen=0;if(main_tip_fill)GdipDeleteBrush(main_tip_fill);main_tip_fill=0;
+    if(main_tip_pen)GdipDeletePen(main_tip_pen);main_tip_pen=0;main_tip_cached_fill=main_tip_cached_accent=0xffffffff;
     if(main_card_native_white)DeleteObject(main_card_native_white);main_card_native_white=0;if(main_card_native_tip)DeleteObject(main_card_native_tip);main_card_native_tip=0;
     main_caption_theme_free();
 }
@@ -78,6 +113,7 @@ static int main_art_init(void){
     for(i=0;i<9;i++){graphics_check(GdipCreatePath(0,paths[i]));if(!*paths[i])return 0;}
     for(i=0;i<3;i++){graphics_check(GdipCreatePath(0,&main_card_paths[i]));if(!main_card_paths[i])return 0;main_round_path(main_card_paths[i],main_card_boxes[i][0],main_card_boxes[i][1],main_card_boxes[i][2],main_card_boxes[i][3],MAIN_CARD_RADIUS);}
     graphics_check(GdipCreatePen1(graphics_color(main_border),1,2,&main_card_border_pen));graphics_check(GdipCreateSolidFill(graphics_color(RGB(232,243,255)),&main_tip_fill));
+    graphics_check(GdipCreatePen1(graphics_color(blue),2.4f,2,&main_tip_pen));if(main_tip_pen){GdipSetPenStartCap(main_tip_pen,2);GdipSetPenEndCap(main_tip_pen,2);}
     main_round_path(main_brand_shape,22,33,11,34,5.5f);main_round_path(main_brand_shape,42,25,11,42,5.5f);main_round_path(main_brand_shape,62,33,11,34,5.5f);
     /* Both tutorial tiles reuse the cached contour generated from the shared SVG. */
     main_hand_art_path(main_hand);graphics_check(clone_path(main_hand,&main_hand_outline));GdipClosePathFigure(main_hand);
@@ -88,6 +124,7 @@ static int main_art_init(void){
     graphics_check(main_start_figure(main_bulb));main_segment(main_bulb,7,23,13,23);graphics_check(main_start_figure(main_bulb));main_segment(main_bulb,8,26,12,26);
     graphics_check(main_start_figure(main_bulb));main_segment(main_bulb,10,-7,10,-4);graphics_check(main_start_figure(main_bulb));main_segment(main_bulb,-6,2,-3,4);graphics_check(main_start_figure(main_bulb));main_segment(main_bulb,23,4,26,2);
     graphics_check(main_start_figure(main_bulb));main_segment(main_bulb,-7,12,-4,12);graphics_check(main_start_figure(main_bulb));main_segment(main_bulb,24,12,27,12);
+    {UI_RECTF bounds;graphics_check(GdipGetPathWorldBounds(main_bulb,&bounds,0,main_tip_pen));main_tip_icon_center=bounds.y+bounds.height/2;main_tip_icon_y=main_card_boxes[2][1]+main_card_boxes[2][3]/2.0f-main_tip_icon_center*0.75f;}
     main_round_path(main_ai_card,256,438,224,60,11);
     return graphics_error==0;
 }
@@ -126,7 +163,7 @@ static void main_gesture_art(int item,int x,int y,int unit,int ox,int oy){
     }
 }
 static void main_chevron(int x,int y,COLORREF color){line(x,y,x+5,y+5,color,2);line(x+5,y+5,x,y+10,color,2);}
-static void main_tip_check(int x,int y){circle(x,y,6,blue);line(x-2,y,x,y+2,RGB(255,255,255),1);line(x,y+2,x+3,y-2,RGB(255,255,255),1);}
+static void main_tip_check(int x,int y){circle(x,y,6,main_tip.accent);line(x-2,y,x,y+2,RGB(255,255,255),1);line(x,y+2,x+3,y-2,RGB(255,255,255),1);}
 static int main_hit_item(int x,int y){
     if(x>=20&&x<=480&&y>=104&&y<170)return 1;
     if(x>=20&&x<=480&&y>=170&&y<=236)return 2;
@@ -367,8 +404,8 @@ static void main_paint(HDC dc,int unit,int ox,int oy){
     main_chevron(175,347,RGB(126,141,163));main_chevron(326,347,RGB(126,141,163));
     box(20,438,226,60,11,main_feedback_down(3)?RGB(206,230,255):main_feedback_highlight(3)?RGB(218,237,255):RGB(230,242,255),main_feedback_highlight(3)||main_feedback_down(3)?RGB(162,202,252):RGB(204,225,254));circle(49,468,17,RGB(218,235,255));main_path(main_gear,main_blue,0,37,456,0.75f,unit,ox,oy);main_chevron(226,464,blue);
     graphics_check(GdipFillPath(graphics,main_feedback_down(4)?main_ai_down_fill:main_feedback_highlight(4)?main_ai_hot_fill:main_ai_fill,main_ai_card));main_path(main_spark,main_white,0,273,457,0.9f,unit,ox,oy);main_path(main_spark,main_white,0,290,473,0.35f,unit,ox,oy);main_chevron(464,464,RGB(255,255,255));
-    main_card(2);main_path(main_bulb,0,main_icon_pen,36,529,0.75f,unit,ox,oy);
-    box(420,520,46,23,12,RGB(215,233,255),RGB(215,233,255));main_tip_check(70,554);main_tip_check(70,575);
+    main_card(2);main_path(main_bulb,0,main_tip_pen,36,main_tip_icon_y,0.75f,unit,ox,oy);
+    box(420,520,46,23,12,main_tip.pill,main_tip.pill);main_tip_check(70,554);main_tip_check(70,575);
     text_sequence=0;
     main_psd_transform(main_psd_title,unit,ox,oy);
     text(dc,6,103,27,300,42,app_text(APP_TEXT_APP_NAME),ink,DT_LEFT);
@@ -384,9 +421,9 @@ static void main_paint(HDC dc,int unit,int ox,int oy){
     for(i=0;i<3;i++){const WCHAR *number=i==0?L"1":i==1?L"2":L"3";text(dc,0,tiles[i]+22,393,20,20,number,RGB(255,255,255),DT_CENTER);text(dc,0,tiles[i]+52,392,83,22,captions[i],ink,DT_LEFT);}
     text(dc,7,80,447,142,26,main_action_feedback[0].result==1?app_text(APP_TEXT_SETTINGS_OPENED):main_action_feedback[0].result==2?app_text(APP_TEXT_SETTINGS_FAILED):app_text(APP_TEXT_SETTINGS),blue,DT_LEFT);text(dc,8,80,473,146,17,main_action_feedback[0].result==1?app_text(APP_TEXT_SETTINGS_OPENED_HINT):main_action_feedback[0].result==2?app_text(APP_TEXT_RETRY_HINT):app_text(APP_TEXT_SETTINGS_DESCRIPTION),RGB(110,133,164),DT_LEFT);
     text(dc,7,316,447,134,26,main_action_feedback[1].result==1?app_text(APP_TEXT_AI_COPIED):main_action_feedback[1].result==2?app_text(APP_TEXT_AI_FAILED):app_text(APP_TEXT_AI),RGB(255,255,255),DT_LEFT);text(dc,8,316,473,141,17,main_action_feedback[1].result==1?app_text(APP_TEXT_AI_COPIED_HINT):main_action_feedback[1].result==2?app_text(APP_TEXT_RETRY_HINT):app_text(APP_TEXT_AI_DESCRIPTION),RGB(223,239,255),DT_LEFT);
-    text(dc,7,66,517,264,28,app_text(APP_TEXT_FIRST_TIPS),RGB(20,76,147),DT_LEFT);text(dc,8,420,520,46,23,app_text(APP_TEXT_TIPS),RGB(61,112,176),DT_CENTER);
-    text(dc,8,82,544,384,22,setup_steps_visible()||tp_state.ready?app_text(APP_TEXT_TIP_SETUP):footer,RGB(92,119,155),DT_LEFT);
-    text(dc,8,82,565,384,22,setup_notice_until?footer:app_text(APP_TEXT_TIP_AI),RGB(92,119,155),DT_LEFT);
+    text(dc,7,66,517,264,28,main_tip.title,main_tip.ink,DT_LEFT);text(dc,8,420,520,46,23,app_text(APP_TEXT_TIPS),main_tip.accent,DT_CENTER);
+    text(dc,8,82,544,384,22,main_tip.first,main_tip.muted,DT_LEFT);
+    text(dc,8,82,565,384,22,main_tip.second,main_tip.muted,DT_LEFT);
     if(window){SetPropW(window,L"ThreeFingerDrag-LogicalWidth",(HANDLE)(ULONG_PTR)UI_WIDTH);SetPropW(window,L"ThreeFingerDrag-LogicalHeight",(HANDLE)(ULONG_PTR)UI_HEIGHT);SetPropW(window,L"ThreeFingerDrag-GuideVisible",(HANDLE)(ULONG_PTR)2);}
 }
 #endif

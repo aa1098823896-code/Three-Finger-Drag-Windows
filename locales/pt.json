@@ -66,5 +66,13 @@
   "PROMPT_READY": "desativado",
   "PROMPT_TEMPLATE": "Ajude-me a configurar o arrasto com três dedos. Desative os gestos de deslizar e tocar com três dedos nos ajustes do touchpad do Windows. Não altere os demais ajustes, especialmente arrastar com toque duplo e velocidade do ponteiro.\r\n\r\nConfira primeiro e pule o que já estiver correto. Anote os valores originais antes de alterar. Depois confira novamente os ajustes do Windows e abra o app para confirmar seu estado. Não instale software, não reinicie nem feche outros apps.\r\n\r\nSe não puder operar meu computador, diga isso e explique passos simples para eu mesmo configurar.\r\n\r\n%s",
   "TRAY_DRAG": "3 dedos",
-  "TRAY_STARTUP": "Autoinício"
+  "TRAY_STARTUP": "Autoinício",
+  "TIP_RUNNING_TOUCH": "Apoie três dedos e deslize, sem pressionar.",
+  "TIP_RUNNING_RELEASE": "Levante os dedos para terminar. Ao fechar, a app continua na bandeja.",
+  "TIP_CHECK_TITLE": "Verificação necessária",
+  "TIP_COPIED_TITLE": "Instruções copiadas",
+  "TIP_COPIED_PASTE": "Na área de transferência. Cole num chat de IA e envie.",
+  "TIP_COPIED_HELP": "Escolha uma IA que possa configurar os dois gestos no seu PC.",
+  "TIP_MANUAL": "Ou altere os dois gestos nas definições do Windows.",
+  "TIP_SETTINGS_TITLE": "Definições do Windows abertas"
 }

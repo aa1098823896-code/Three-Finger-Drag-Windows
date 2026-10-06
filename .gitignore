@@ -46,6 +46,7 @@
 !/scripts/generate-hand.ps1
 !/scripts/generate-language.ps1
 !/scripts/Set-SettingsBranding.ps1
+!/scripts/Install.ps1
 !/docs/
 /docs/*
 !/docs/LICENSE.upstream.txt

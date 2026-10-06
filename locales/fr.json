@@ -66,5 +66,13 @@
   "PROMPT_READY": "désactivés",
   "PROMPT_TEMPLATE": "Aidez-moi à configurer le glissement à trois doigts. Désactivez les balayages et appuis à trois doigts dans les paramètres du pavé tactile Windows. Ne changez rien d’autre, notamment le glissement par double appui et la vitesse du pointeur.\r\n\r\nVérifiez d’abord et ignorez les réglages déjà corrects. Notez les anciennes valeurs avant de modifier. Ensuite, vérifiez à nouveau les paramètres Windows et rouvrez l’appli pour confirmer son état. N’installez rien, ne redémarrez pas et ne fermez pas d’autres applis.\r\n\r\nSi vous ne pouvez pas contrôler l’ordinateur, dites-le et expliquez des étapes simples à suivre moi-même.\r\n\r\n%s",
   "TRAY_DRAG": "3 doigts",
-  "TRAY_STARTUP": "Au démarrage"
+  "TRAY_STARTUP": "Au démarrage",
+  "TIP_RUNNING_TOUCH": "Posez trois doigts et glissez, sans appuyer.",
+  "TIP_RUNNING_RELEASE": "Levez les doigts pour finir. Fermer la fenêtre laisse le logiciel actif.",
+  "TIP_CHECK_TITLE": "À vérifier",
+  "TIP_COPIED_TITLE": "Consigne copiée",
+  "TIP_COPIED_PASTE": "Dans le presse-papiers. Collez dans un chat IA et envoyez.",
+  "TIP_COPIED_HELP": "Choisissez une IA capable de régler ces deux gestes sur votre PC.",
+  "TIP_MANUAL": "Ou réglez vous-même les deux gestes dans les paramètres Windows.",
+  "TIP_SETTINGS_TITLE": "Paramètres Windows ouverts"
 }

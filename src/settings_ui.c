@@ -40,6 +40,7 @@ static void main_art_free(void);
 static int setup_validation;
 static int setup_failed,setup_copy_result;
 static DWORD setup_notice_until;
+static int setup_notice_action,setup_notice_result;
 static WCHAR setup_notice[180];
 static void free_text(void);
 static void text(HDC,int,int,int,int,int,const WCHAR *,COLORREF,UINT);
@@ -171,8 +172,12 @@ static void refresh(void){
     if(window&&(main_slides[0].target!=(on?1000:0)||main_slides[1].target!=(startup?1000:0)))main_feedback_sync_switches(1);
 }
 static void setup_action(void){
+    int result;
     if(isolated||(test_no_host&&!setup_validation))return;
-    main_feedback_notice(3,setup_open_settings()?1:2);
+    result=setup_open_settings()?1:2;
+    setup_notice_action=3;setup_notice_result=result;
+    wcscpy(setup_notice,app_text(result==1?APP_TEXT_TIP_SETTINGS_TITLE:APP_TEXT_SETTINGS_FAILED));setup_notice_until=GetTickCount()+12000;
+    main_feedback_notice(3,result);refresh();redraw();
 }
 static void setup_copy_ai(void){
     WCHAR prompt[4096],details[512];int count;HGLOBAL memory=0;WCHAR *target;
@@ -193,6 +198,7 @@ static void setup_copy_ai(void){
         }
     }
     if(memory)GlobalFree(memory);
+    setup_notice_action=4;setup_notice_result=setup_copy_result;
     wcscpy(setup_notice,setup_copy_result==1?app_text(APP_TEXT_COPY_NOTICE):app_text(APP_TEXT_COPY_ERROR_NOTICE));setup_notice_until=GetTickCount()+12000;main_feedback_notice(4,setup_copy_result);tp_report(0);refresh();redraw();
 }
 static void change_toggle(int item){
@@ -220,6 +226,7 @@ static void main_activate_item(int item){
 }
 static void paint_content(HDC dc,int unit,int ox,int oy){
     /* Shapes and cached glyph outlines share the same continuous vector transform. */
+    main_tip_update();
     main_background_prefilled=main_paint_background(dc,unit,ox,oy);
     main_cards_prefilled=main_background_prefilled&&main_paint_card_interiors(dc,unit,ox,oy);
     if(graphics_begin(dc,unit/10000.0f,ox,oy)){
@@ -295,7 +302,7 @@ static int render_bmp(const WCHAR *name){
 }
 static void render_language_layout(void){
     WCHAR path[MAX_PATH];FILE *f;int i;_snwprintf(path,MAX_PATH,L"%s\\ui-language-layout.json",folder);f=_wfopen(path,L"wb");if(!f)return;
-    fprintf(f,"{\"Language\":%d,\"FittedLabels\":%d,\"TooSmallLabels\":%d,\"Labels\":[",app_language,language_fitted_labels,language_fit_errors);
+    fprintf(f,"{\"Language\":%d,\"FittedLabels\":%d,\"TooSmallLabels\":%d,\"TipState\":%d,\"BulbCenterY\":%.3f,\"TipCenterY\":%.3f,\"Labels\":[",app_language,language_fitted_labels,language_fit_errors,main_tip.mode,main_tip_icon_y+main_tip_icon_center*0.75f,main_card_boxes[2][1]+main_card_boxes[2][3]/2.0f);
     for(i=0;i<text_sequence;i++){
         UI_RECTF bounds;int j;GdipGetPathWorldBounds(text_cache[i].path,&bounds,0,0);
         fprintf(f,"%s{\"Text\":\"",i?",":"");for(j=0;text_cache[i].value[j];j++)fprintf(f,"\\u%04x",(unsigned)text_cache[i].value[j]);
@@ -394,8 +401,14 @@ int WINAPI WinMain(HINSTANCE instance,HINSTANCE previous,LPSTR command,int show)
     if(!init_text()){free_text();DeleteObject(background_brush);graphics_cleanup();return 1;}
     if(!main_art_init()){free_text();DeleteObject(background_brush);graphics_cleanup();return 1;}
     main_feedback_init();
-    if(isolated&&strstr(command,"--render-action=ai")){main_action_feedback[1].result=1;wcscpy(footer,app_text(APP_TEXT_COPY_NOTICE));setup_notice_until=1;}
-    if(isolated&&strstr(command,"--render-action=settings"))main_action_feedback[0].result=1;
+    if(isolated&&(strstr(command,"--render-action=ai")||strstr(command,"--render-action=copy-failed"))){
+        setup_notice_action=4;setup_notice_result=strstr(command,"--render-action=copy-failed")?2:1;
+        main_action_feedback[1].result=setup_notice_result;wcscpy(footer,app_text(setup_notice_result==1?APP_TEXT_COPY_NOTICE:APP_TEXT_COPY_ERROR_NOTICE));setup_notice_until=GetTickCount()+12000;
+    }
+    if(isolated&&strstr(command,"--render-action=settings")){setup_notice_action=3;setup_notice_result=strstr(command,"--render-action=settings-failed")?2:1;main_action_feedback[0].result=setup_notice_result;setup_notice_until=GetTickCount()+12000;}
+    if(isolated&&strstr(command,"--render-state=paused")){on=0;refresh();main_feedback_sync_switches(0);}
+    if(isolated&&strstr(command,"--render-state=waiting")){wcscpy(status_label,app_text(APP_TEXT_STATUS_WAITING));wcscpy(footer,app_text(APP_TEXT_FOOTER_WAITING));status_color=muted;status_fill=RGB(232,233,236);}
+    if(isolated&&strstr(command,"--render-state=error")){wcscpy(status_label,app_text(APP_TEXT_STATUS_RETRY));wcscpy(footer,app_text(APP_TEXT_FOOTER_RETRY));status_color=RGB(155,92,10);status_fill=RGB(255,245,224);}
     if(strstr(command,"--render-current"))wcscpy(folder,data_folder);
     if(strstr(command,"--render-preview")||strstr(command,"--render-prepare")||strstr(command,"--render-current")){result=render_bmp(L"ui-preview.bmp")?0:1;render_language_layout();free_text();DeleteObject(background_brush);graphics_cleanup();return result;}
     memset(&wc,0,sizeof(wc));wc.lpfnWndProc=proc;wc.hInstance=instance;wc.lpszClassName=APP_UI_CLASS;wc.hCursor=LoadCursorW(0,IDC_ARROW);
