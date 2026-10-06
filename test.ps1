@@ -7,7 +7,9 @@ if (-not $CompilerPath) {
     else { $CompilerPath = (Get-Command tcc.exe -ErrorAction Stop).Source }
 }
 $taskCompiler = (Resolve-Path -LiteralPath $CompilerPath -ErrorAction Stop).ProviderPath
-$taskResults = Join-Path $PSScriptRoot '.test-output'
+$taskSource = Join-Path $PSScriptRoot 'src'
+$taskTests = Join-Path $PSScriptRoot 'tests'
+$taskResults = Join-Path $PSScriptRoot 'build/tests'
 [IO.Directory]::CreateDirectory($taskResults) | Out-Null
 if (-not (Test-Path -LiteralPath $taskResults -PathType Container)) { throw 'Test output directory was not created.' }
 $taskProbes = @(
@@ -17,7 +19,7 @@ $taskProbes = @(
 )
 foreach ($taskProbe in $taskProbes) {
     $taskExe = Join-Path $taskResults ([IO.Path]::GetFileNameWithoutExtension($taskProbe.Source) + '.exe')
-    & $taskCompiler -m64 '-Wl,-subsystem=windows' -o $taskExe (Join-Path $PSScriptRoot $taskProbe.Source) (Join-Path $PSScriptRoot 'user32-extra.def') -luser32 -lgdi32 -lkernel32 -ladvapi32
+    & $taskCompiler -m64 '-Wl,-subsystem=windows' -I $taskSource -o $taskExe (Join-Path $taskTests $taskProbe.Source) (Join-Path $taskSource 'user32-extra.def') -luser32 -lgdi32 -lkernel32 -ladvapi32
     if ($LASTEXITCODE -ne 0) { throw ('Probe build failed: ' + $taskProbe.Source) }
     $taskRun = Start-Process -FilePath $taskExe -WorkingDirectory $taskResults -WindowStyle Hidden -PassThru -Wait -ErrorAction Stop
     if ($taskRun.ExitCode -ne 0) { throw ('Regression failed: ' + $taskProbe.Source) }

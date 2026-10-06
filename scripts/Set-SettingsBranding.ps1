@@ -1,7 +1,9 @@
 ﻿param([Parameter(Mandatory=$true)][string]$Path)
 $ErrorActionPreference='Stop'
 $taskTarget=[IO.Path]::GetFullPath($Path)
-if([IO.Path]::GetDirectoryName($taskTarget) -ne $PSScriptRoot -or -not (Test-Path -LiteralPath $taskTarget -PathType Leaf)){throw '只允许处理本目录已构建的设置程序'}
+$taskRoot = Split-Path -Parent $PSScriptRoot
+$taskBuild = [IO.Path]::GetFullPath((Join-Path $taskRoot 'build'))
+if([IO.Path]::GetDirectoryName($taskTarget) -ne $taskBuild -or [IO.Path]::GetFileName($taskTarget) -ne 'GestureSettings.exe' -or -not (Test-Path -LiteralPath $taskTarget -PathType Leaf)){throw 'Only the settings executable in the build directory may be branded.'}
 Add-Type -TypeDefinition @'
 using System;using System.IO;using System.Text;using System.Runtime.InteropServices;using System.ComponentModel;
 public static class GestureSettingsBranding {
@@ -35,6 +37,6 @@ public static class GestureSettingsBranding {
  }
 }
 '@ -ErrorAction Stop
-[GestureSettingsBranding]::Apply($taskTarget,(Join-Path $PSScriptRoot 'Gesture.ico'))
+[GestureSettingsBranding]::Apply($taskTarget,(Join-Path $taskRoot 'assets/Gesture.ico'))
 $taskInfo=[Diagnostics.FileVersionInfo]::GetVersionInfo($taskTarget)
 if($taskInfo.FileDescription -ne '三指拖拽' -or $taskInfo.ProductName -ne '三指拖拽'){throw '程序名称资源回读不一致'}

@@ -41,7 +41,7 @@ static void main_art_free(void){
 }
 static void main_segment(void *path,float x,float y,float xx,float yy){graphics_check(main_add_line(path,x,y,xx,yy));}
 static void main_curve(void *path,float x,float y,float a,float b,float c,float d,float xx,float yy){graphics_check(main_add_bezier(path,x,y,a,b,c,d,xx,yy));}
-#include "tutorial_hand.h"
+#include "generated/tutorial_hand.h"
 static void main_polygon(void *path,const float *points,int count){
     int i;for(i=0;i<count;i++)main_segment(path,points[2*i],points[2*i+1],points[2*((i+1)%count)],points[2*((i+1)%count)+1]);
     graphics_check(GdipClosePathFigure(path));

@@ -49,7 +49,22 @@ v0.1.0 已在一台 Windows 11 25H2（26200.9168）电脑、两块不同 DPI 的
 
 模拟回归覆盖正常抬指、混合触控报告、同一批触点尾帧防重复、复用触点 ID，以及连续 100 次手势。这些检查不注入真实输入，不能代替其他型号触控板的实际验证。目前没有覆盖所有 Windows 版本和设备。
 
-教程手形已补齐五指，并修顺小拇指到掌缘的轮廓，保留原来的姿势、三指接触位置与画风。底部动态提示和教程动效会在此基础上分开迭代。
+教程手形已补齐五指，并修顺小拇指到掌缘的轮廓，保留原来的姿势、三指接触位置与画风。教程动效计划放在仓库说明中，软件保留当前卡片布局。
+
+## 目录结构
+
+```text
+src/            原生后台与设置界面源码
+src/generated/  从共享素材生成的头文件
+tests/          不注入真实输入的回归测试
+scripts/        素材生成与程序图标处理
+assets/         共享图标和教程手形
+docs/           原始许可与已准备版本的清单
+build.ps1       构建入口
+test.ps1        测试入口
+```
+
+`build/` 保存本机生成的程序、预览和测试结果；编译器、个人诊断记录与备份不进入 Git。
 
 ## 从源码构建
 
@@ -61,9 +76,9 @@ v0.1.0 已在一台 Windows 11 25H2（26200.9168）电脑、两块不同 DPI 的
 .\build.ps1 -CompilerPath 'C:\tools\tcc\tcc.exe'
 ```
 
-脚本生成 `GestureHost.exe` 和 `GestureSettings.exe`，复用仓库中的 `Gesture.ico`，写入程序图标及版本信息，并运行两组手势模拟回归及提示词隐私回归。构建前请先退出从当前目录运行的程序。
+脚本在 `build/` 生成 `GestureHost.exe` 和 `GestureSettings.exe`，复制 `assets/Gesture.ico`，写入程序图标及版本信息，并运行两组手势模拟回归及提示词隐私回归。构建前请先退出从该构建目录运行的程序。
 
-教程手形共用 `assets/tutorial-hand.svg`。构建脚本将其转换为 `tutorial_hand.h` 中的原生矢量路径，两张教程卡片复用同一轮廓；修改手形时只需编辑这个 SVG。
+教程手形共用 `assets/tutorial-hand.svg`。构建脚本将其转换为 `src/generated/tutorial_hand.h` 中的原生矢量路径，两张教程卡片复用同一轮廓；修改手形时只需编辑这个 SVG。
 
 只运行回归，或导出原生界面预览：
 
@@ -72,7 +87,7 @@ v0.1.0 已在一台 Windows 11 25H2（26200.9168）电脑、两块不同 DPI 的
 .\build.ps1 -CompilerPath 'C:\tools\tcc\tcc.exe' -RenderPreview
 ```
 
-测试结果写入 `.test-output`；预览是 `ui-preview.png`。这些开发产物不进入 Git。
+测试结果写入 `build/tests/`；预览是 `build/ui-preview.png`。这些开发产物不进入 Git。
 
 ## 版本与回退
 
@@ -84,8 +99,8 @@ v0.1.0 已在一台 Windows 11 25H2（26200.9168）电脑、两块不同 DPI 的
 git worktree add --detach ..\three-finger-drag-v0.1.0 v0.1.0
 ```
 
-正式发布后，需要直接回到已验证的运行程序时，可以使用对应版本的 Release 包。当前 `release-manifest.json` 记录 `v0.1.1` 准备包中程序和图标的 SHA-256。
+正式发布后，需要直接回到已验证的运行程序时，可以使用对应版本的 Release 包。当前 `docs/release-manifest.json` 记录 `v0.1.1` 准备包中程序和图标的 SHA-256。
 
 ## 许可与来源
 
-采用 [MIT License](LICENSE)。手势识别参考 [ThreeFingerDragOnWindows 2.0.7](https://github.com/ClementGre/ThreeFingerDragOnWindows/tree/2.0.7)，保留 Clément Grennerat 的版权和原始许可于 `LICENSE.upstream.txt`。本仓库包含原生后台、Win32 设置界面及相应修改；没有分发原版应用安装包或编译器。
+采用 [MIT License](LICENSE)。手势识别参考 [ThreeFingerDragOnWindows 2.0.7](https://github.com/ClementGre/ThreeFingerDragOnWindows/tree/2.0.7)，保留 Clément Grennerat 的版权和[原始许可](docs/LICENSE.upstream.txt)。本仓库包含原生后台、Win32 设置界面及相应修改；没有分发原版应用安装包或编译器。
