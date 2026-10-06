@@ -16,6 +16,7 @@
 !/settings_ui.c
 !/gesture_release_probe.c
 !/normal_lift_probe.c
+!/ai_prompt_probe.c
 !/user32-extra.def
 !/app_shared.h
 !/compositor_api.h

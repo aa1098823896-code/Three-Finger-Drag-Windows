@@ -18,8 +18,8 @@ public static class GestureSettingsBranding {
  }
  static byte[] Text(string key,string value){return Block(key,1,(ushort)(value.Length+1),Encoding.Unicode.GetBytes(value+"\0"));}
  static byte[] Version(){
-  var fixedInfo=new uint[]{0xFEEF04BD,0x10000,0x00000001,0,0x00000001,0,0x3f,0,0x40004,1,0,0,0};var bytes=new byte[52];Buffer.BlockCopy(fixedInfo,0,bytes,0,52);
-  var table=Block("080404B0",1,0,new byte[0],Text("FileDescription","三指拖拽"),Text("ProductName","三指拖拽"),Text("InternalName","GestureSettings"),Text("OriginalFilename","GestureSettings.exe"),Text("FileVersion","0.1.0.0"),Text("ProductVersion","0.1.0.0"));
+  var fixedInfo=new uint[]{0xFEEF04BD,0x10000,0x00000001,0x00010000,0x00000001,0x00010000,0x3f,0,0x40004,1,0,0,0};var bytes=new byte[52];Buffer.BlockCopy(fixedInfo,0,bytes,0,52);
+  var table=Block("080404B0",1,0,new byte[0],Text("FileDescription","三指拖拽"),Text("ProductName","三指拖拽"),Text("InternalName","GestureSettings"),Text("OriginalFilename","GestureSettings.exe"),Text("FileVersion","0.1.1.0"),Text("ProductVersion","0.1.1.0"));
   var strings=Block("StringFileInfo",1,0,new byte[0],table);var translation=Block("Translation",0,4,new byte[]{4,8,0xB0,4});var variables=Block("VarFileInfo",1,0,new byte[0],translation);
   return Block("VS_VERSION_INFO",0,52,bytes,strings,variables);
  }

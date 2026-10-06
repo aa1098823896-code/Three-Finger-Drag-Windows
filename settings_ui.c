@@ -149,19 +149,18 @@ static void setup_action(void){
     main_feedback_notice(3,setup_open_settings()?1:2);
 }
 static void setup_copy_ai(void){
-    WCHAR prompt[4096];int count;HGLOBAL memory=0;WCHAR *target;
+    WCHAR prompt[4096],details[128];int count;HGLOBAL memory=0;WCHAR *target;
     if(isolated||(test_no_host&&!setup_validation))return;
     tp_check();
+    if(!tp_state.native_ok||!tp_state.cache_ok)wcscpy(details,L"软件暂时无法确认这两项设置，请以系统设置里看到的结果为准。");
+    else if(!tp_state.present)wcscpy(details,L"软件没有检测到支持三指操作的触控板，请先确认电脑是否支持。");
+    else if(!tp_state.enabled)wcscpy(details,L"软件看到触控板目前已关闭，请先检查这一点。");
+    else _snwprintf(details,128,L"软件看到：三指轻扫%s，三指点击%s。",tp_state.swipe?L"还没设为「无」":L"已设为「无」",tp_state.tap?L"还没设为「无」":L"已设为「无」");
     count=_snwprintf(prompt,4096,
-        L"请帮我实际处理 Windows「三指拖拽」的前置设置冲突。我不熟悉这些设置，请使用你已获授权的电脑操作能力处理，并核验结果。\r\n\r\n"
-        L"目标只有两项：在 Windows 触控板设置中，将「三指手势」的轻扫（滑动）和点击都设为「无」。保留「双击并拖动以多选」、普通轻触点击、指针速度、灵敏度、四指动作、双指滚动和缩放。这版不要求关闭双击拖动，用户已实测开启后不影响三指拖拽。不要添加独立速度设置。\r\n\r\n"
-        L"如果这两项已经设为「无」，请保留当前配置，先确认用户实际遇到的问题，再检查程序运行和相关交互；不重复改已完成的设置。\r\n\r\n"
-        L"当前检测：Windows build %lu；精确触控板=%s；触控板开启=%s；最多触点=%lu；生效缓存可读取=%s；三指点击=%lu、三指滑动=%lu（0 表示无）；双击拖动=%s；指针速度=%lu；灵敏度=%lu；四指点击=%lu、四指滑动=%lu。\r\n"
-        L"注册表可读取=%s；ThreeFingerTapEnabled=%lu，ThreeFingerSlideEnabled=%lu。生效缓存与注册表可能不一致，仅写入 0 不能证明系统动作已经关闭。\r\n"
-        L"自动准备失败阶段=%d，错误=%lu；本次回滚核验=%s。首次配置备份（若已创建）：%s\\touchpad-setup-backup.ini。程序：%s\\GestureSettings.exe。\r\n\r\n"
-        L"请先检查并备份当前设置，优先用能即时生效的系统方法；触控板页面入口为 ms-settings:devices-touchpad。若注册表方法不生效，应通过 Windows 设置中的实际控件处理，不要重复同一个无效方案。不要自动重启资源管理器、注销、重启电脑或结束其他程序。\r\n"
-        L"处理后运行上述程序的 --prepare-check（只读检查），查看 %s\\touchpad-setup-status.json，确认 Ready=true；同时核对 Windows 设置的三指滑动和点击均为「无」，以及双击拖动、速度、灵敏度和四指动作保持原样，再重新打开程序确认「需设置」消失。若你的 AI 环境没有电脑操作能力，请明确说明，给出最短的人工步骤，不要假称已经处理。",
-        tp_state.build,tp_state.present?L"是":L"否",tp_state.enabled?L"是":L"否",tp_state.native.contacts,tp_state.cache_ok?L"是":L"否",tp_state.tap,tp_state.swipe,tp_state.tap_drag?L"开启":L"关闭",tp_state.native.speed,tp_state.native.sensitivity,tp_state.four_tap,tp_state.four_swipe,tp_state.registry_ok?L"是":L"否",tp_state.registry_tap,tp_state.registry_swipe,tp_prepare_stage,tp_prepare_error,tp_rollback_ok?L"通过（未尝试时不适用）":L"未通过",data_folder,app_folder,data_folder);
+        L"请帮我设置好三指拖拽：在系统触控板设置里，把三指轻扫和三指点击都设为「无」。其他设置保持原样，尤其不要关闭双击拖动，也不要改系统指针速度。\r\n\r\n"
+        L"先检查当前设置，已经设置好的就不重复修改。修改前记下原来的值；改完后再看一次系统设置，并重新打开软件确认状态。不要安装额外软件、重启电脑或关闭其他程序。\r\n\r\n"
+        L"如果你不能操作电脑，请直接告诉我，并用最简单的步骤教我自己设置。\r\n\r\n%s",
+        details);
     setup_copy_result=2;
     if(count>0&&count<4096){
         memory=GlobalAlloc(GMEM_MOVEABLE,((SIZE_T)count+1)*sizeof(WCHAR));

@@ -1,5 +1,5 @@
 {
-  "version": "v0.1.0",
+  "version": "v0.1.1",
   "platform": "windows-x64",
   "files": [
     {
@@ -9,8 +9,8 @@
     },
     {
       "name": "GestureSettings.exe",
-      "bytes": 151552,
-      "sha256": "96BBF18308836281B2414A777ECB46188F9404068F2ED948EE0ACD15AEA2C520"
+      "bytes": 150528,
+      "sha256": "650B6A201D304AB8C810F7620ABF29ED0B2C31DAC88D65FE6CA693472FC505F3"
     },
     {
       "name": "Gesture.ico",
