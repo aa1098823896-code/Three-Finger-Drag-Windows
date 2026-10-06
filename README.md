@@ -6,6 +6,29 @@
 
 移动沿用 Windows 的系统指针速度，不需要另调一套速度。常驻后台和设置界面分开，关闭设置窗口后仍可从托盘使用；只提供「三指拖拽」和「开机启动」两项日常设置。
 
+## 轻触拖动，也轻装运行
+
+原生 C + Win32 实现，不打包浏览器，不需要 .NET、Windows App SDK 或额外运行框架。关闭设置窗口后，只保留一个小型原生后台。
+
+| 项目 | 体积或本机实测 |
+| --- | --- |
+| Windows x64 正式下载包 | 约 **108 KiB** |
+| 两个程序合计 | 约 **246 KiB** |
+| 常驻后台程序文件 | **39 KiB** |
+| 后台空闲私有内存 | 约 **1.7 MiB** |
+| 后台空闲工作集 | 约 **11.6 MiB** |
+| 后台空闲 CPU | 10 秒采样未观察到 CPU 时间增长 |
+
+内存和 CPU 数据来自一台 Windows 11 x64 电脑，只统计 `GestureHost.exe` 的空闲状态；设置窗口另计。工作集包含系统共享内存，私有内存是另一种统计口径，不能相加。实际占用随触控板、驱动、操作和系统状态变化。这些数字说明它很轻量，不表示零占用或完全没有性能影响。
+
+## 三指怎么用
+
+**轻放三指 → 一起滑动 → 抬手结束。不用重按触控板。**
+
+![三指轻触教学：移动窗口、选择文字、框选图标、框选截图、拖放文件、调整大小](assets/tutorial.gif)
+
+演示依次展示六种常见操作，屏幕动作与手势同步。截图场景表示已经进入截图模式；在 Windows 中可以先按 `Win+Shift+S`。教学动画仅用于 README，不随软件运行。
+
 ## 下载安装
 
 1. 在 [Releases](https://github.com/aa1098823896-code/Three-Finger-Drag-Windows/releases/latest) 下载 `three-finger-drag-v1.0.0-windows-x64.zip`，解压。
@@ -19,7 +42,7 @@
 
 也可以保持文件在一起，直接运行 `GestureSettings.exe` 使用便携版；启用开机启动后请勿随意移动目录。Windows 可能提示来自网络的脚本或未签名程序，请先核对下载来源和校验值；本项目没有付费签名证书。
 
-不需要 .NET、Windows App SDK 或额外运行框架。两个程序合计约 246 KiB；这表示文件体积，不代表内存占用。安装包还包含共享图标、安装脚本、校验清单与许可。
+安装包包含两个程序、共享图标、安装脚本、校验清单与许可。
 
 ## 交给自己的 Agent 安装
 
@@ -79,9 +102,9 @@ src/            原生后台与设置界面源码
 src/generated/  从共享素材与翻译生成的头文件
 locales/        九种语言的可维护文字
 tests/          不注入真实输入的回归测试
-scripts/        素材生成与程序图标处理
-assets/         共享图标和教程手形
-docs/           原始许可与已准备版本的清单
+scripts/        素材、翻译和 README 教学动画的生成工具
+assets/         共享图标、教程手形和 README 教学 GIF
+docs/           原始许可、正式版本清单和教学 HTML
 build.ps1       构建入口
 test.ps1        测试入口
 ```
@@ -101,6 +124,8 @@ test.ps1        测试入口
 脚本在 `build/` 生成 `GestureHost.exe` 和 `GestureSettings.exe`，复制 `assets/Gesture.ico`，写入程序图标及版本信息，并运行手势、提示词隐私、窗口缩放及语言匹配回归。构建前请先退出从该构建目录运行的程序。
 
 教程手形共用 `assets/tutorial-hand.svg`。构建脚本将其转换为 `src/generated/tutorial_hand.h` 中的原生矢量路径，两张教程卡片复用同一轮廓；修改手形时只需编辑这个 SVG。
+
+README 教学动画来自 `docs/tutorial.html`，复用同一五指轮廓。文字使用自然字宽，高亮范围由文字实际宽度计算，不拉伸字形。需要重新导出时，使用 Node.js + Playwright 运行 `scripts/export-tutorial-gif.cjs`，再用 Python + Pillow + NumPy 运行 `scripts/encode-tutorial-gif.py`；这些依赖只用于文档导出，用户安装软件不需要它们。
 
 只运行回归，或导出原生界面预览：
 
@@ -130,6 +155,12 @@ git worktree add --detach ..\three-finger-drag-v1.0.0 v1.0.0
 ## English
 
 Lightweight three-finger drag for Windows precision touchpads. Move windows, select text, box-select files or screenshot areas, drag and drop, and resize windows. **Rest three fingers and slide; you do not need to press down.** Lift your fingers to finish. Movement follows the Windows pointer speed.
+
+### Small by design
+
+Native C + Win32, with no bundled browser or additional runtime. The Windows x64 download is about **108 KiB**; both executables total about **246 KiB**, and the resident host executable is **39 KiB**. Closing the settings window leaves only the native host running.
+
+On one Windows 11 x64 computer, the idle host used about **1.7 MiB of private memory** and **11.6 MiB of working set**. A 10-second idle sample recorded no increase in CPU time. These are separate memory measurements for `GestureHost.exe`, excluding the settings window; usage varies with hardware, drivers and activity. They do not imply zero resource use. The animated guide above is documentation only and adds no runtime workload to the utility.
 
 ### Install
 

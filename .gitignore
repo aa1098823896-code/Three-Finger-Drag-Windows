@@ -12,6 +12,7 @@
 /assets/*
 !/assets/tutorial-hand.svg
 !/assets/Gesture.ico
+!/assets/tutorial.gif
 !/src/
 /src/*
 !/src/gesture_host.c
@@ -47,10 +48,13 @@
 !/scripts/generate-language.ps1
 !/scripts/Set-SettingsBranding.ps1
 !/scripts/Install.ps1
+!/scripts/export-tutorial-gif.cjs
+!/scripts/encode-tutorial-gif.py
 !/docs/
 /docs/*
 !/docs/LICENSE.upstream.txt
 !/docs/release-manifest.json
+!/docs/tutorial.html
 !/locales/
 /locales/*
 !/locales/zh-CN.json
