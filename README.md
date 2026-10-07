@@ -1,10 +1,20 @@
 # 三指拖拽 · Three-Finger Drag for Windows
 
-[下载正式版 v1.0.0](https://github.com/aa1098823896-code/Three-Finger-Drag-Windows/releases/tag/v1.0.0) · [English instructions](#english)
+[下载正式版 v1.0.0](https://github.com/aa1098823896-code/Three-Finger-Drag-Windows/releases/tag/v1.0.0) · [三指教学 / Tutorial](#tutorial) · [English instructions](#english)
 
 轻量的 Windows 三指拖拽工具。三根手指轻触触控板并移动，即可移动窗口、选择文字、框选文件或桌面图标、框选截图区域、拖放文件与图片、调整窗口大小；**不需要重按触控板**，松手即结束。
 
 移动沿用 Windows 的系统指针速度，不需要另调一套速度。常驻后台和设置界面分开，关闭设置窗口后仍可从托盘使用；只提供「三指拖拽」和「开机启动」两项日常设置。
+
+<a name="tutorial"></a>
+
+# 三指怎么用 · How to use
+
+**轻放三指 → 一起滑动 → 抬手结束。不用重按触控板。**
+
+![三指轻触教学：移动窗口、选择文字、框选图标、框选截图、拖放文件、调整大小](assets/tutorial.gif?v=1440-bilingual-2.5x)
+
+中英双语演示依次展示六种常见操作，屏幕动作与手势同步。截图场景表示已经进入截图模式；在 Windows 中可以先按 `Win+Shift+S`。教学动画仅用于 README，不随软件运行。
 
 ## 轻触拖动，也轻装运行
 
@@ -20,14 +30,6 @@
 | 后台空闲 CPU | 10 秒采样未观察到 CPU 时间增长 |
 
 内存和 CPU 数据来自一台 Windows 11 x64 电脑，只统计 `GestureHost.exe` 的空闲状态；设置窗口另计。工作集包含系统共享内存，私有内存是另一种统计口径，不能相加。实际占用随触控板、驱动、操作和系统状态变化。这些数字说明它很轻量，不表示零占用或完全没有性能影响。
-
-## 三指怎么用
-
-**轻放三指 → 一起滑动 → 抬手结束。不用重按触控板。**
-
-![三指轻触教学：移动窗口、选择文字、框选图标、框选截图、拖放文件、调整大小](assets/tutorial.gif?v=1440-bilingual-2.5x)
-
-中英双语演示依次展示六种常见操作，屏幕动作与手势同步。截图场景表示已经进入截图模式；在 Windows 中可以先按 `Win+Shift+S`。教学动画仅用于 README，不随软件运行。
 
 ## 下载安装
 
@@ -155,6 +157,8 @@ git worktree add --detach ..\three-finger-drag-v1.0.0 v1.0.0
 采用 [MIT License](LICENSE)。手势识别参考 [ThreeFingerDragOnWindows 2.0.7](https://github.com/ClementGre/ThreeFingerDragOnWindows/tree/2.0.7)，保留 Clément Grennerat 的版权和[原始许可](docs/LICENSE.upstream.txt)。本仓库包含原生后台、Win32 设置界面及相应修改；没有分发原版应用安装包或编译器。
 
 ## English
+
+[↑ Watch the bilingual tutorial](#tutorial)
 
 Lightweight three-finger drag for Windows precision touchpads. Move windows, select text, box-select files or screenshot areas, drag and drop, and resize windows. **Rest three fingers and slide; you do not need to press down.** Lift your fingers to finish. Movement follows the Windows pointer speed.
 
