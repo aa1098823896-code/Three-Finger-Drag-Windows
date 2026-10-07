@@ -3,6 +3,7 @@
 Development dependencies: Pillow and NumPy. Run after scripts/export-tutorial-gif.cjs.
 Keeps only a few frames in memory; exported teaching media do not run in the app.
 """
+import argparse
 import json
 import re
 from pathlib import Path
@@ -10,20 +11,28 @@ from PIL import Image, ImageChops, GifImagePlugin
 import numpy as np
 
 ROOT = Path(__file__).resolve().parent.parent
-FRAMES = ROOT / "build" / "tutorial-frames"
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--frames-dir', type=Path, default=ROOT / 'build' / 'tutorial-frames')
+parser.add_argument('--output', type=Path, default=ROOT / 'assets' / 'tutorial.gif')
+parser.add_argument('--report', type=Path, default=ROOT / 'build' / 'tutorial-check' / 'gif-validation.json')
+args = parser.parse_args()
+FRAMES = args.frames_dir
 data = json.loads((FRAMES / "frames.json").read_text("utf-8"))
 frames = data["frames"]
 
 # Include all six scenes and each gesture phase in the shared palette.
 palette_frames = []
-for scene in dict.fromkeys(frame["scene"] for frame in frames):
+scenes = list(dict.fromkeys(frame["scene"] for frame in frames))
+with Image.open(FRAMES / frames[0]['file']) as first:
+    sample_height = max(1, round(first.height * 190 / first.width))
+for scene in scenes:
     for moment in (0.4, 1.5, 3.7, 5.5, 6.7):
         frame = min((f for f in frames if f["scene"] == scene), key=lambda f: abs(f["time"] - moment))
         with Image.open(FRAMES / frame["file"]) as im:
-            palette_frames.append(im.convert("RGB").resize((190, 319), Image.Resampling.LANCZOS))
-sheet = Image.new("RGB", (190 * 6, 319 * 5), "white")
+            palette_frames.append(im.convert("RGB").resize((190, sample_height), Image.Resampling.LANCZOS))
+sheet = Image.new("RGB", (190 * len(scenes), sample_height * 5), "white")
 for i, im in enumerate(palette_frames):
-    sheet.paste(im, ((i // 5) * 190, (i % 5) * 319))
+    sheet.paste(im, ((i // 5) * 190, (i % 5) * sample_height))
 source_colors = re.findall(r"#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})(?![0-9a-fA-F])", (ROOT / "docs" / "tutorial.html").read_text("utf-8"))
 essential = sorted({tuple(bytes.fromhex(value if len(value) == 6 else "".join(c * 2 for c in value))) for value in source_colors})
 assert len(essential) < 160, "Too many fixed colors for a GIF palette"
@@ -52,7 +61,8 @@ def map_colors(rgb):
     return indexed
 
 
-output = ROOT / "assets" / "tutorial.gif"
+output = args.output
+output.parent.mkdir(parents=True, exist_ok=True)
 previous = None
 duration_carry = 0
 with output.open("wb") as stream:
@@ -88,6 +98,10 @@ with Image.open(output) as gif:
         lengths.append(gif.info.get("duration", 0))
     report = {"bytes": output.stat().st_size, "size": gif.size, "frames": gif.n_frames,
               "loop": gif.info.get("loop"), "durationMs": sum(lengths), "text": data["text"]}
-    assert report["loop"] == 0 and report["durationMs"] == 50400, report
-(ROOT / "build" / "tutorial-check" / "gif-validation.json").write_text(json.dumps(report, indent=2), "utf-8")
+    report.update({'fps':data.get('fps'), 'speed':data.get('speed'), 'minimumDelayMs':min(lengths), 'colors':255})
+    expected_duration = sum(frame['durationMs'] for frame in frames)
+    assert report["loop"] == 0 and report["durationMs"] == expected_duration, report
+    assert report['minimumDelayMs'] >= 20, report
+args.report.parent.mkdir(parents=True, exist_ok=True)
+args.report.write_text(json.dumps(report, indent=2), "utf-8")
 print(json.dumps(report))

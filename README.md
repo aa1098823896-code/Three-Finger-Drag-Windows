@@ -25,9 +25,9 @@
 
 **轻放三指 → 一起滑动 → 抬手结束。不用重按触控板。**
 
-![三指轻触教学：移动窗口、选择文字、框选图标、框选截图、拖放文件、调整大小](assets/tutorial.gif)
+![三指轻触教学：移动窗口、选择文字、框选图标、框选截图、拖放文件、调整大小](assets/tutorial.gif?v=1440-bilingual-2.5x)
 
-演示依次展示六种常见操作，屏幕动作与手势同步。截图场景表示已经进入截图模式；在 Windows 中可以先按 `Win+Shift+S`。教学动画仅用于 README，不随软件运行。
+中英双语演示依次展示六种常见操作，屏幕动作与手势同步。截图场景表示已经进入截图模式；在 Windows 中可以先按 `Win+Shift+S`。教学动画仅用于 README，不随软件运行。
 
 ## 下载安装
 
@@ -126,6 +126,8 @@ test.ps1        测试入口
 教程手形共用 `assets/tutorial-hand.svg`。构建脚本将其转换为 `src/generated/tutorial_hand.h` 中的原生矢量路径，两张教程卡片复用同一轮廓；修改手形时只需编辑这个 SVG。
 
 README 教学动画来自 `docs/tutorial.html`，复用同一五指轮廓。文字使用自然字宽，高亮范围由文字实际宽度计算，不拉伸字形。需要重新导出时，使用 Node.js + Playwright 运行 `scripts/export-tutorial-gif.cjs`，再用 Python + Pillow + NumPy 运行 `scripts/encode-tutorial-gif.py`；这些依赖只用于文档导出，用户安装软件不需要它们。
+
+默认导出宽 1440 像素、高度等比计算的中英双语动画，速度为 2.5 倍；连续动作每秒 50 帧，静止片段合并帧。本次导出使用本机已安装的华康圆体和 Segoe UI，仓库不包含字体文件。
 
 只运行回归，或导出原生界面预览：
 

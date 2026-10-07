@@ -15,7 +15,7 @@
 </style>
 </head>
 <body>
-<main><three-finger-demo></three-finger-demo></main>
+<main><three-finger-demo compact speed="2.5"></three-finger-demo></main>
 <noscript>请启用浏览器的 JavaScript 以播放教学动画。操作要点：指针先放到目标上，三指轻放，一起移动，抬起结束；不需要按下触控板。</noscript>
 <script>
   (()=>{
@@ -34,7 +34,7 @@
  * 三指轻触拖动 · 零依赖教学组件
  * 用法：<three-finger-demo></three-finger-demo>
  * 属性：theme="light|dark|auto"，scene="window|text|select|capture|drop|resize"
- *       autoplay="false"，speed="0.75|1|1.25|1.5"，compact
+ *       autoplay="false"，speed="0.75|1|1.25|1.5|2|2.5|3"，compact
  * 公共方法：play(), pause(), replay(), selectScene(id), seek(seconds), setSpeed(value)
  * 这是动作示意，不读取触控板硬件、不捕获系统三指手势、不操作真实文件。
  */
@@ -65,12 +65,12 @@
   };
   const icon = (name, cls = '') => `<svg class="icon ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ''}</svg>`;
   const SCENES = [
-    {id:'window',label:'移动窗口',title:'拖住标题栏，窗口跟着走',hint:'先把指针放到窗口标题栏，再用三指轻轻移动。',result:'松手后，窗口停在新的位置。',start:[220,75],end:[345,115],hand:[67,22],cursor:'arrow'},
-    {id:'text',label:'选择文字',title:'像画一道线，轻松选中文字',hint:'把指针放到文字起点，三指轻触后横向移动。',result:'松手后，选中的文字会保留高亮。',start:[77,173],end:[522,173],hand:[95,0],cursor:'ibeam'},
-    {id:'select',label:'框选图标',title:'从空白处开始，一次选中多个',hint:'在空白处三指轻拖，框选文件或桌面图标。',result:'松手完成框选，已选中的图标保持高亮。',start:[122,56],end:[459,259],hand:[78,44],cursor:'arrow'},
-    {id:'capture',label:'框选截图',title:'先进入截图模式，再三指框选',hint:'截图模式已开启：三指轻拖，划出需要的区域。',result:'松手结束框选；截图是否立即保存由截图工具决定。',start:[101,92],end:[490,242],hand:[82,34],cursor:'cross'},
-    {id:'drop',label:'拖放文件',title:'文件和图片，轻轻拖到目的地',hint:'把指针放到已选文件或图片上，三指拖到目标文件夹。',result:'松手放下，文件与图片移入目标文件夹。',start:[91,153],end:[438,164],hand:[98,3],cursor:'arrow'},
-    {id:'resize',label:'调整大小',title:'拖住窗口边缘，自由调整大小',hint:'把指针放到窗口边缘或角上，三指轻轻向外拖。',result:'松手后，窗口保持调整后的大小。',start:[382,235],end:[521,282],hand:[63,29],cursor:'diagonal'}
+    {id:'window',label:'移动窗口',english:'Move windows',title:'拖住标题栏，窗口跟着走',hint:'先把指针放到窗口标题栏，再用三指轻轻移动。',result:'松手后，窗口停在新的位置。',start:[220,75],end:[345,115],hand:[67,22],cursor:'arrow'},
+    {id:'text',label:'选择文字',english:'Select text',title:'像画一道线，轻松选中文字',hint:'把指针放到文字起点，三指轻触后横向移动。',result:'松手后，选中的文字会保留高亮。',start:[77,173],end:[522,173],hand:[95,0],cursor:'ibeam'},
+    {id:'select',label:'框选图标',english:'Select icons',title:'从空白处开始，一次选中多个',hint:'在空白处三指轻拖，框选文件或桌面图标。',result:'松手完成框选，已选中的图标保持高亮。',start:[122,56],end:[459,259],hand:[78,44],cursor:'arrow'},
+    {id:'capture',label:'框选截图',english:'Snip a region',title:'先进入截图模式，再三指框选',hint:'截图模式已开启：三指轻拖，划出需要的区域。',result:'松手结束框选；截图是否立即保存由截图工具决定。',start:[101,92],end:[490,242],hand:[82,34],cursor:'cross'},
+    {id:'drop',label:'拖放文件',english:'Drag & drop',title:'文件和图片，轻轻拖到目的地',hint:'把指针放到已选文件或图片上，三指拖到目标文件夹。',result:'松手放下，文件与图片移入目标文件夹。',start:[91,153],end:[438,164],hand:[98,3],cursor:'arrow'},
+    {id:'resize',label:'调整大小',english:'Resize windows',title:'拖住窗口边缘，自由调整大小',hint:'把指针放到窗口边缘或角上，三指轻轻向外拖。',result:'松手后，窗口保持调整后的大小。',start:[382,235],end:[521,282],hand:[63,29],cursor:'diagonal'}
   ];
   const css = `
     :host{--blue:#087cff;--blue-deep:#0769d8;--ink:#1b2637;--muted:#64758c;--soft:#8b9aaf;--line:#e5edf7;--card:#fff;--surface:#f6f9fe;--tint:#eaf3ff;--stage:#f2f6fc;--shadow:0 16px 60px #284f8520;display:block;width:100%;max-width:760px;margin:0 auto;color:var(--ink);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;-webkit-font-smoothing:antialiased;color-scheme:light;contain:layout style}
@@ -89,6 +89,58 @@
     :host([compact]) .card{padding:18px 18px 14px;border-radius:22px;box-shadow:none}:host([compact]) .intro{display:none}:host([compact]) h1{font-size:24px}:host([compact]) .tabs{margin-bottom:12px}:host([compact]) .hint{font-size:15px;min-height:58px;padding:10px 12px}:host([compact]) .hand-viewport{width:min(82%,400px)}:host([compact]) .foot{display:none}
     @media(max-width:760px){.card{padding:18px 16px 14px;border-radius:24px}.head{flex-direction:column;gap:10px}.head-actions{width:100%;justify-content:space-between}.light-badge{font-size:11px;padding:7px 10px}.tabs{gap:5px}.tab{font-size:12px;padding:10px 4px}.hint{font-size:14px;min-height:60px}.hand-viewport{width:min(82%,380px)}.steps{gap:6px}.step{padding:10px 8px;min-height:60px}.step strong{font-size:13px}.step small{font-size:10px}.foot{font-size:10px}}
     @media(max-width:540px){.tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.panel-title{font-size:13px}.hint{font-size:13px;min-height:54px}.hand-viewport{width:min(100%,340px)}.steps{grid-template-columns:1fr;gap:6px}.step{min-height:54px}.foot{display:none}.headline h1{font-size:23px}.intro{font-size:12px}}
+    /* README layout: show the screen and the same hand together, without a tall stack. */
+    :host([compact]) .card{padding:12px 12px 16px;border:0;border-radius:0;box-shadow:none}
+    :host([compact]) .head{display:none}
+    :host([compact]) h1{font-size:25px;line-height:1.25}
+    :host([compact]) .head-actions{width:auto;gap:8px;justify-content:flex-end}
+    :host([compact]) .light-badge{font-size:12px;padding:7px 10px}
+    :host([compact]) .tabs{grid-template-columns:repeat(6,minmax(0,1fr));gap:3px;padding:0 0 3px;margin-bottom:14px;border-radius:0;background:transparent;border-bottom:1px solid var(--line)}
+    :host([compact]) .tab{font-size:20px;font-weight:650;gap:6px;padding:12px 2px;border-radius:9px}
+    :host([compact]) .tab .icon{width:18px;height:18px;align-self:flex-start;margin-top:3px}
+    :host([compact]) .tab-label{display:flex;flex-direction:column;gap:4px;min-width:0}
+    :host([compact]) .tab-label strong,:host([compact]) .step strong{font-family:"华康圆体W5(P)","YouYuan","幼圆","Yuanti SC",sans-serif;font-weight:400}
+    :host([compact]) .tab-label small{display:block;font:400 12px/1.4 "Segoe UI",Arial,sans-serif;color:var(--muted);white-space:nowrap}
+    :host([compact]) .tab[aria-selected="true"] .tab-label small{color:var(--blue-deep)}
+    :host([compact]) .tab[aria-selected="true"]{background:transparent;box-shadow:none;color:var(--blue)}
+    :host([compact]) .tab[aria-selected="true"]::after{content:"";position:absolute;left:16px;right:16px;bottom:0;height:2px;border-radius:2px;background:var(--blue)}
+    :host([compact]) .stage{grid-template-columns:minmax(0,1.8fr) minmax(0,1fr);grid-template-rows:auto;column-gap:12px;row-gap:0;align-items:stretch}
+    :host([compact]) .screen-side,:host([compact]) .hand-side{display:contents}
+    :host([compact]) .panel-title{display:none}
+    :host([compact]) .scene-viewport{grid-column:1;grid-row:1}
+    :host([compact]) .scene-viewport{border-radius:14px;box-shadow:none}
+    :host([compact]) .screen-svg text[font-size="9"],:host([compact]) .screen-svg text[font-size="10"],:host([compact]) .screen-svg text[font-size="11"],:host([compact]) .screen-svg text[font-size="12"]{font-size:14px}
+    :host([compact]) .hand-viewport{grid-column:2;grid-row:1;width:100%;height:100%;min-height:0;aspect-ratio:auto;margin:0;border:1px solid #a9c7eb75;background:linear-gradient(155deg,#edf3fa,#e3ecf6);border-radius:14px;align-self:stretch;contain:size}
+    :host([compact]) .hand-note{display:none}
+    :host([compact]) .hand-note .icon{display:none}
+    :host([compact]) .scene-hint{display:none}
+    :host([compact]) .scene-hint .icon{margin:0}
+    :host([compact]) .steps{gap:16px;margin-top:16px;grid-template-columns:repeat(3,minmax(0,1fr))}
+    :host([compact]) .step{position:relative;padding:4px 6px;min-height:52px;gap:10px;border:0;border-radius:0;background:transparent;box-shadow:none;justify-content:center}
+    :host([compact]) .step:not(:last-child)::after{content:"→";position:absolute;right:-12px;top:50%;transform:translateY(-50%);font-size:22px;font-weight:400;color:var(--soft)}
+    :host([compact]) .step strong{font-size:20px;white-space:nowrap}
+    :host([compact]) .step small{display:block;margin-top:5px;font:400 16px/1.4 "Segoe UI",Arial,sans-serif;color:var(--muted);white-space:nowrap}
+    :host([compact]) .step .step-n{width:28px;height:28px;font-size:16px}
+    :host([compact]) .step .step-n .icon{width:18px;height:18px}
+    @media(max-width:700px){
+      :host([compact]) .head{align-items:flex-start;flex-direction:column;gap:8px}
+      :host([compact]) .head-actions{width:100%;justify-content:space-between}
+      :host([compact]) .tabs{grid-template-columns:repeat(3,minmax(0,1fr))}
+      :host([compact]) .tab{font-size:16px;gap:4px}
+      :host([compact]) .tab .icon{width:14px;height:14px}
+      :host([compact]) .tab-label small{font-size:11px}
+      :host([compact]) .stage{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}
+      :host([compact]) .hand-note{padding:0}
+      :host([compact]) .steps{grid-template-columns:1fr;gap:4px}
+      :host([compact]) .step{padding:8px 12px;gap:10px;justify-content:flex-start}
+      :host([compact]) .step:not(:last-child)::after{display:none}
+      :host([compact]) .step strong{font-size:16px}
+      :host([compact]) .step small{font-size:14px}
+      :host([compact]) .step .step-n{width:24px;height:24px;font-size:14px}
+    }
+    @media(max-width:360px){
+      :host([compact]) .tab .icon{display:none}
+    }
     @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
   `;
   const folderSymbol = `<g id="folder-art"><path d="M1 8Q1 3 6 3H24L30 9H58Q63 9 63 14V42Q63 47 58 47H6Q1 47 1 42Z" fill="#439bf7"/><path d="M1 18Q1 13 6 13H58Q63 13 63 18V43Q63 48 58 48H6Q1 48 1 43Z" fill="url(#folder-gradient)"/><path d="M7 14H57" stroke="#b7e2ff" stroke-width="1.5" stroke-linecap="round" opacity=".8"/></g>`;
@@ -145,27 +197,13 @@
     HAND_POSE.assetY + y * HAND_POSE.scale
   ]);
   function handSVG() {
-    const keys = [[29,28],[62,28],[95,161],[261,28],[294,28]];
     const pose = `translate(${HAND_POSE.assetX} ${HAND_POSE.assetY}) scale(${HAND_POSE.scale})`;
-    return `<svg class="hand-svg" viewBox="0 0 382 330" role="img" aria-label="白色简笔手势：食指、中指、无名指轻放在触控板上，三指一起移动，然后抬起；不需要按下触控板">
+    // The entire right panel is the touchpad. Keep the shared hand uniformly scaled.
+    return `<svg class="hand-svg" viewBox="38 42 306 306" preserveAspectRatio="xMidYMid meet" role="img" aria-label="三指轻放在触控板上，一起移动，然后抬起；无需按压触控板">
       <defs>
-        <linearGradient id="metal" x1="0" y1="0" x2=".25" y2="1"><stop stop-color="#eef1f6"/><stop offset=".48" stop-color="#e3e9f1"/><stop offset="1" stop-color="#d8e0eb"/></linearGradient>
-        <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#e3eaf3"/><stop offset="1" stop-color="#e9eff6"/></linearGradient>
-        <filter id="hardware-shadow" x="-25%" y="-20%" width="150%" height="160%"><feDropShadow dx="0" dy="9" stdDeviation="8" flood-color="#3b5b85" flood-opacity=".12"/></filter>
         <filter id="hand-shadow-filter" x="-40%" y="-30%" width="180%" height="180%"><feGaussianBlur id="hand-shadow-blur" stdDeviation="5"/></filter>
-        <clipPath id="trackpad-touch-clip"><rect x="69" y="103" width="244" height="169" rx="10"/></clipPath>
+        <clipPath id="trackpad-touch-clip"><rect x="38" y="42" width="306" height="306" rx="16"/></clipPath>
       </defs>
-      <g transform="translate(12 18)" filter="url(#hardware-shadow)">
-        <rect x="10" y="5" width="338" height="280" rx="17" fill="url(#metal)" stroke="#c4cfdd" stroke-width="1"/>
-        <path d="M26 281H332" stroke="#eef5ff" stroke-width="1.3" stroke-linecap="round"/>
-        <rect x="23" y="12" width="312" height="48" rx="9" fill="#78869b" opacity=".17"/>
-        ${keys.map(([x,w])=>`<rect x="${x}" y="16" width="${w}" height="36" rx="5" fill="#526075"/><path d="M${x+5} 50H${x+w-5}" stroke="#75849a" stroke-width="1"/>`).join('')}
-        <path d="M272 30h8m-4-3-3 3 3 3m26-3h8m-4-3 3 3-3 3" fill="none" stroke="#d8e1ee" stroke-width="1" stroke-linecap="round"/>
-        <text x="42" y="38" fill="#dce4ef" font-size="9" text-anchor="middle">fn</text><text x="76" y="37" fill="#dce4ef" font-size="12" text-anchor="middle">⌥</text>
-        <rect x="56" y="84" width="246" height="171" rx="11" fill="#b7c3d3"/>
-        <rect x="57" y="85" width="244" height="169" rx="10" fill="url(#glass)" stroke="#f3f7fc" stroke-width=".9"/>
-        <path d="M69 86H290" stroke="#bcc9da" stroke-opacity=".7"/><path d="M136 285h86" stroke="#bac8d9" stroke-width="3" stroke-linecap="round" opacity=".6"/>
-      </g>
       <g clip-path="url(#trackpad-touch-clip)">
         <g id="finger-trails" fill="none" stroke="#459cff" stroke-width="10" stroke-linecap="round" opacity="0">${HAND_CONTACTS.map((_,i)=>`<path id="finger-trail-${i}"/>`).join('')}</g>
         <g id="finger-contacts" opacity="0">${HAND_CONTACTS.map(([x,y],i)=>`<g id="contact-${i}"><ellipse cx="${x}" cy="${y}" rx="18" ry="16" fill="#1687ff" fill-opacity=".085"/><ellipse cx="${x}" cy="${y}" rx="13" ry="12" fill="#1687ff" fill-opacity=".095" stroke="#1687ff" stroke-opacity=".43" stroke-width="1.15"/></g>`).join('')}</g>
@@ -175,7 +213,7 @@
       <g id="glide-arrow" opacity="0" fill="none" stroke="#1986f5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path id="glide-line" d="M0 0H28"/><path id="glide-head" d="m22-5 6 5-6 5"/></g>
     </svg>`;
   }
-  const template = () => `<style>${css}</style><section class="card" aria-label="三指拖动演示教学" data-playing="true"><header class="head"><div class="headline"><h1>三指轻放，<em>轻松拖动</em></h1><p class="intro">六种常见操作，手势与屏幕同步演示。</p></div><div class="head-actions"><span class="light-badge">${icon('feather')}不需要重按触控板</span><div style="display:flex;gap:8px"><button class="icon-btn pause-btn" type="button" title="暂停演示" aria-label="暂停演示">${icon('pause')}</button><button class="icon-btn replay-btn" type="button" title="重新演示当前场景" aria-label="重新演示当前场景">${icon('replay')}</button></div></div></header><nav class="tabs" role="tablist" aria-label="选择演示场景">${SCENES.map((s,i)=>`<button class="tab" id="tab-${s.id}" type="button" role="tab" aria-selected="${!i}" tabindex="${i?-1:0}" aria-controls="demo-stage" data-scene="${s.id}">${icon(s.id)}${s.label}<span class="tab-progress" aria-hidden="true"></span></button>`).join('')}</nav><div class="stage" id="demo-stage" role="tabpanel" aria-labelledby="tab-window" tabindex="0"><div class="screen-side"><div class="panel-title"><span class="scene-title">拖住标题栏，窗口跟着走</span><span class="number" aria-hidden="true">01 / 06</span></div><div class="scene-viewport">${screenSVG()}</div><p class="hint scene-hint">${icon('arrow')}<span>先把指针放到窗口标题栏，再用三指轻轻移动。</span></p></div><div class="hand-side"><div class="panel-title"><span class="gesture-title">触控板</span><span class="gesture-state">准备轻触</span></div><div class="hand-viewport">${handSVG()}</div><p class="hint hand-note">${icon('feather')}<span>只需接触表面，不用按下去</span></p></div></div><div class="steps" aria-label="三步操作"><div class="step active"><span class="step-n">1</span><div><strong>三指轻放</strong><small>接触表面，不用按下</small></div></div><div class="step"><span class="step-n">2</span><div><strong>轻轻移动</strong><small>三指一起，保持轻触</small></div></div><div class="step"><span class="step-n">3</span><div><strong>松手完成</strong><small>抬起手指，结束拖动</small></div></div></div><footer class="foot"><span>动作示意 · 不会操作真实文件</span><div class="playback"><button type="button" class="tour-btn" aria-pressed="true" title="切换全部轮播 / 单场景循环"><span class="tiny-dot"></span><span class="tour-label">六个场景连播</span></button><span aria-hidden="true">·</span><button type="button" class="speed" title="切换演示速度" aria-label="演示速度：1 倍">1×</button></div></footer><p class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p></section>`;
+  const template = () => `<style>${css}</style><section class="card" aria-label="三指拖动演示教学" data-playing="true"><header class="head"><div class="headline"><h1>三指轻放，<em>轻松拖动</em></h1><p class="intro">六种常见操作，手势与屏幕同步演示。</p></div><div class="head-actions"><span class="light-badge">${icon('feather')}不需要重按触控板</span><div style="display:flex;gap:8px"><button class="icon-btn pause-btn" type="button" title="暂停演示" aria-label="暂停演示">${icon('pause')}</button><button class="icon-btn replay-btn" type="button" title="重新演示当前场景" aria-label="重新演示当前场景">${icon('replay')}</button></div></div></header><nav class="tabs" role="tablist" aria-label="选择演示场景">${SCENES.map((s,i)=>`<button class="tab" id="tab-${s.id}" type="button" role="tab" aria-selected="${!i}" tabindex="${i?-1:0}" aria-controls="demo-stage" data-scene="${s.id}">${icon(s.id)}<span class="tab-label"><strong>${s.label}</strong><small lang="en">${s.english}</small></span><span class="tab-progress" aria-hidden="true"></span></button>`).join('')}</nav><div class="stage" id="demo-stage" role="tabpanel" aria-labelledby="tab-window" tabindex="0"><div class="screen-side"><div class="panel-title"><span class="scene-title">拖住标题栏，窗口跟着走</span><span class="number" aria-hidden="true">01 / 06</span></div><div class="scene-viewport">${screenSVG()}</div></div><div class="hand-side"><div class="panel-title"><span class="gesture-title">触控板 · 无需按压</span><span class="gesture-state">准备轻触</span></div><div class="hand-viewport">${handSVG()}</div><p class="hint hand-note">${icon('feather')}<span>轻放三指，不用按压</span></p></div><p class="hint scene-hint">${icon('arrow')}<span>先把指针放到窗口标题栏，再用三指轻轻移动。</span></p></div><div class="steps" aria-label="三步操作"><div class="step active"><span class="step-n">1</span><div><strong>三指轻放，不按压</strong><small lang="en">Rest 3 fingers, no press</small></div></div><div class="step"><span class="step-n">2</span><div><strong>轻轻移动</strong><small lang="en">Glide together</small></div></div><div class="step"><span class="step-n">3</span><div><strong>松手完成</strong><small lang="en">Lift to finish</small></div></div></div><footer class="foot"><span>动作示意 · 不会操作真实文件</span><div class="playback"><button type="button" class="tour-btn" aria-pressed="true" title="切换全部轮播 / 单场景循环"><span class="tiny-dot"></span><span class="tour-label">六个场景连播</span></button><span aria-hidden="true">·</span><button type="button" class="speed" title="切换演示速度" aria-label="演示速度：1 倍">1×</button></div></footer><p class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p></section>`;
 
   class ThreeFingerDemo extends HTMLElement {
     static get observedAttributes() { return ['theme','scene','autoplay','speed']; }
@@ -199,7 +237,7 @@
       const s=this.getAttribute('scene');
       this._scene=Math.max(0,SCENES.findIndex(v=>v.id===s));
       this._playing=this.getAttribute('autoplay')!=='false' && !this._reduced.matches;
-      this._speed=clamp(Number(this.getAttribute('speed')) || 1,.25,2);
+      this._speed=clamp(Number(this.getAttribute('speed')) || 2.5,.25,3);
       if(this._reduced.matches) this._time=6.65;
       this.shadowRoot.querySelector('.pause-btn').addEventListener('click',()=>this._playing?this.pause():this.play());
       this.shadowRoot.querySelector('.replay-btn').addEventListener('click',()=>this.replay());
@@ -210,7 +248,7 @@
         this._announce(this._tour?'已切换为六个场景连播。':'只循环当前场景。');
       });
       this.shadowRoot.querySelector('.speed').addEventListener('click',()=>{
-        const rates=[.75,1,1.25,1.5];
+        const rates=[.75,1,1.25,1.5,2,2.5,3];
         this.setSpeed(rates[(rates.indexOf(this._speed)+1)%rates.length]);
       });
       this.shadowRoot.addEventListener('keydown',this._onKey);
@@ -246,7 +284,7 @@
       this._emit('scenechange');
     }
     seek(seconds) { const t=Number(seconds); if(!Number.isFinite(t)) return; this._time=clamp(t,0,DURATION-.001); this._last=0; this._render(); }
-    setSpeed(value) { if(!Number.isFinite(value) || value<=0) return; this._speed=clamp(value,.25,2); this._syncControls(); }
+    setSpeed(value) { if(!Number.isFinite(value) || value<=0) return; this._speed=clamp(value,.25,3); this._syncControls(); }
     _announce(text) { this.shadowRoot.querySelector('[role="status"]').textContent=text; }
     _emit(name) { this.dispatchEvent(new CustomEvent('threefinger:'+name,{detail:this.state,bubbles:true,composed:true})); }
     _onKey(e) {
@@ -269,7 +307,7 @@
         tab.querySelector('.tab-progress').style.transform='scaleX(0)';
       });
       this._els['demo-stage'].setAttribute('aria-labelledby','tab-'+s.id);
-      this.shadowRoot.querySelector('.scene-title').textContent=s.title;
+      this.shadowRoot.querySelector('.scene-title').textContent=this.hasAttribute('compact')?'屏幕':s.title;
       this.shadowRoot.querySelector('.number').textContent=String(this._scene+1).padStart(2,'0')+' / 06';
       this._els['pointer-shape'].setAttribute('href','#pointer-'+s.cursor);
       this._activeProgress=this._els['tab-'+s.id].querySelector('.tab-progress');
